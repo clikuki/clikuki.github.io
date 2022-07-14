@@ -1,0 +1,94 @@
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+body {
+	--c-primary-400: hsl(74, 100%, 30%);
+	--c-primary-500: hsl(74, 100%, 50%);
+	--c-primary-600: hsl(74, 100%, 70%);
+	--c-secondary-400: hsl(279, 100%, 30%);
+	--c-secondary-500: hsl(279, 100%, 50%);
+	--c-secondary-600: hsl(279, 100%, 70%);
+	--c-text: #222;
+
+	font-family: system-ui;
+	margin: 0;
+	color: var(--c-text);
+	scroll-padding-top: 3rem;
+}
+
+.navbar {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	background-color: var(--c-primary-500);
+	font-size: x-large;
+	padding: 0.5rem 3rem;
+	position: sticky;
+	top: 0;
+}
+
+.navbar ul {
+	list-style: none;
+	margin: 0 10rem 0 0;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 3rem;
+}
+
+.navbar ul li {
+	transition: transform 500ms;
+}
+
+.navbar ul li:hover {
+	transform: translateY(-5px);
+}
+
+.siteLink {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	font-size: 2.5rem;
+}
+
+.siteLink img {
+	display: block;
+	width: 50px;
+	aspect-ratio: 1;
+	border-radius: 40%;
+}
+
+.hero {
+	padding: 1rem;
+	background: url(assets/placeholderHeroBanner.jpg) no-repeat center,
+		hsl(0, 0%, 80%);
+	height: 25rem;
+}
+
+.hero .intro {
+	margin: 1rem 0 0 3rem;
+	display: flex;
+	width: fit-content;
+	flex-direction: column;
+}
+
+.hero .intro-name {
+	font-size: 5rem;
+	line-height: 4rem;
+}
+
+.hero .intro-end-part {
+	align-self: flex-end;
+}
+
+a {
+	color: inherit;
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
