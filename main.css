@@ -5,29 +5,27 @@
 }
 
 body {
-	--c-primary-400: hsl(74, 100%, 30%);
-	--c-primary-500: hsl(74, 100%, 50%);
-	--c-primary-600: hsl(74, 100%, 70%);
-	--c-secondary-400: hsl(279, 100%, 30%);
-	--c-secondary-500: hsl(279, 100%, 50%);
-	--c-secondary-600: hsl(279, 100%, 70%);
-	--c-text: #222;
+	--c-main-400: hsl(279, 100%, 40%);
+	--c-main-500: hsl(279, 100%, 50%);
+	--c-main-600: hsl(279, 100%, 60%);
+	--c-black: #222;
+	--c-white: #eee;
 
 	font-family: system-ui;
 	margin: 0;
-	color: var(--c-text);
-	scroll-padding-top: 3rem;
+	color: var(--c-black);
+	background-color: var(--c-white);
 }
 
 .navbar {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	background-color: var(--c-primary-500);
+	background-color: var(--c-main-500);
 	font-size: x-large;
-	padding: 0.5rem 3rem;
-	position: sticky;
-	top: 0;
+	padding: 0 3rem;
+	height: 4rem;
+	box-shadow: 1 0 3px black;
 }
 
 .navbar ul {
@@ -37,51 +35,106 @@ body {
 	justify-content: center;
 	align-items: center;
 	gap: 3rem;
+	height: 100%;
 }
 
 .navbar ul li {
+	transition: background-color 500ms;
+	height: 100%;
+	display: flex;
+	align-items: center;
+}
+
+.navbar ul a {
 	transition: transform 500ms;
+	display: flex;
+	align-items: center;
+	height: 100%;
+	width: 100%;
+	padding: 0 1rem;
 }
 
 .navbar ul li:hover {
+	background-color: var(--c-main-400);
+}
+
+.navbar ul a:hover {
 	transform: translateY(-5px);
 }
 
 .siteLink {
+	margin: 0;
+	line-height: 0;
+	height: 80%;
+	padding-right: 2rem;
+	border-right: 2px solid black;
+}
+
+.siteLink a {
 	display: flex;
 	align-items: center;
 	gap: 5px;
 	font-size: 2.5rem;
+	font-weight: normal;
+	height: 100%;
 }
 
 .siteLink img {
 	display: block;
-	width: 50px;
+	height: 100%;
 	aspect-ratio: 1;
-	border-radius: 40%;
+	border-radius: 30%;
+	margin: 0 3rem;
 }
 
-.hero {
+.content {
 	padding: 1rem;
-	background: url(assets/placeholderHeroBanner.jpg) no-repeat center,
-		hsl(0, 0%, 80%);
 	height: 25rem;
+	margin: 0 3rem;
 }
 
-.hero .intro {
-	margin: 1rem 0 0 3rem;
+.intro {
+	margin-top: 1rem;
 	display: flex;
 	width: fit-content;
 	flex-direction: column;
 }
 
-.hero .intro-name {
+.intro .intro-top {
+	margin-left: 5px;
+}
+
+.intro .intro-name {
 	font-size: 5rem;
 	line-height: 4rem;
 }
 
-.hero .intro-end-part {
+.intro .intro-bottom {
 	align-self: flex-end;
+}
+
+.btnLinks {
+	margin: 5rem 0 0 1rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.btnLinks button {
+	height: 100%;
+	width: fit-content;
+	border: 2px solid var(--c-main-400);
+	background-color: var(--c-main-600);
+	font-size: 1.2rem;
+	border-radius: 1rem;
+	padding: 0.2rem 1rem;
+	cursor: pointer;
+	transition: all 500ms;
+}
+
+.btnLinks button:hover {
+	scale: 1.1;
+	background-color: var(--c-main-500);
 }
 
 a {
