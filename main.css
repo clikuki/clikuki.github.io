@@ -5,9 +5,9 @@
 }
 
 body {
-	--c-main-400: hsl(279, 100%, 40%);
-	--c-main-500: hsl(279, 100%, 50%);
-	--c-main-600: hsl(279, 100%, 60%);
+	--c-main-400: hsl(39, 63%, 40%);
+	--c-main-500: hsl(39, 63%, 50%);
+	--c-main-600: hsl(39, 63%, 60%);
 	--c-black: #222;
 	--c-white: #eee;
 
@@ -132,7 +132,7 @@ body {
 	height: 100%;
 	width: fit-content;
 	border: 2px solid var(--c-main-400);
-	background-color: var(--c-main-600);
+	background-color: var(--c-main-500);
 	font-size: 1.2rem;
 	border-radius: 10px;
 	padding: 0.5rem 2rem;
@@ -143,7 +143,6 @@ body {
 .btnLinks button:hover {
 	transition: all 200ms;
 	scale: 1.1;
-	background-color: var(--c-main-500);
 }
 
 .btnLinks button a {
