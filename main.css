@@ -128,7 +128,7 @@ body {
 	gap: 0.5rem;
 }
 
-.btnLinks button {
+.btnLinks a {
 	height: 100%;
 	width: fit-content;
 	border: 2px solid var(--c-main-400);
@@ -140,12 +140,9 @@ body {
 	transition: all 400ms;
 }
 
-.btnLinks button:hover {
+.btnLinks a:hover {
 	transition: all 200ms;
 	scale: 1.1;
-}
-
-.btnLinks button a {
 	text-decoration: none;
 }
 
