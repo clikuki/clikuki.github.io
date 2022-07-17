@@ -69,6 +69,8 @@ body {
 	height: 100%;
 	width: 100%;
 	padding: 0 1rem;
+	text-decoration: none;
+	color: inherit;
 }
 
 .navbar .list li:hover {
@@ -79,6 +81,7 @@ body {
 .navbar .list a:hover {
 	transition: transform 200ms;
 	transform: translateY(-5px);
+	text-decoration: underline;
 }
 
 .siteLink {
@@ -96,6 +99,12 @@ body {
 	font-size: 2.5rem;
 	font-weight: normal;
 	height: 100%;
+	text-decoration: none;
+	color: inherit;
+}
+
+.siteLink a:hover {
+	text-decoration: underline;
 }
 
 .siteLink img {
@@ -103,15 +112,6 @@ body {
 	height: 100%;
 	aspect-ratio: 1;
 	border-radius: 30%;
-}
-
-a {
-	color: inherit;
-	text-decoration: none;
-}
-
-a:hover {
-	text-decoration: underline;
 }
 
 @media screen and (max-width: 760px) {

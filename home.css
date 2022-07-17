@@ -46,12 +46,13 @@
 	padding: 0.5rem 2rem;
 	cursor: pointer;
 	transition: scale 400ms;
+	text-decoration: none;
+	color: inherit;
 }
 
 .btnLinks a:hover {
 	transition: scale 200ms;
 	scale: 1.1;
-	text-decoration: none;
 }
 
 .bigCookie {
@@ -173,6 +174,7 @@
 	height: 13rem;
 	background-color: var(--c-main-500);
 	transition: translate 400ms;
+	color: inherit;
 }
 
 .project:hover {
