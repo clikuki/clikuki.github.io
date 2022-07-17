@@ -32,23 +32,37 @@ body {
 	box-shadow: 0 -5px 10px black;
 }
 
-.navbar ul {
+.navbar .links {
+	display: flex;
+	height: 100%;
+}
+
+.navbar .openLinks {
+	background-color: transparent;
+	border: none;
+	display: none;
+	cursor: pointer;
+}
+
+.navbar .list {
 	list-style: none;
 	display: flex;
 	justify-content: center;
 	align-items: center;
 	gap: 3rem;
 	height: 100%;
+	margin: 0;
+	padding: 0;
 }
 
-.navbar ul li {
+.navbar .list li {
 	transition: background-color 500ms;
 	height: 100%;
 	display: flex;
 	align-items: center;
 }
 
-.navbar ul a {
+.navbar .list a {
 	transition: transform 500ms;
 	display: flex;
 	align-items: center;
@@ -57,12 +71,12 @@ body {
 	padding: 0 1rem;
 }
 
-.navbar ul li:hover {
+.navbar .list li:hover {
 	transition: background-color 200ms;
 	background-color: var(--c-main-400);
 }
 
-.navbar ul a:hover {
+.navbar .list a:hover {
 	transition: transform 200ms;
 	transform: translateY(-5px);
 }
@@ -96,9 +110,9 @@ body {
 	height: 25rem;
 	margin: 0 3rem;
 	display: grid;
-	grid-template-columns: repeat(3, fit-content);
 	grid-template-rows: repeat(2, 50%);
 	flex-grow: 1;
+	column-gap: 0.5rem;
 }
 
 .intro {
@@ -133,15 +147,16 @@ body {
 	width: fit-content;
 	border: 2px solid var(--c-main-400);
 	background-color: var(--c-main-500);
+	text-align: center;
 	font-size: 1.2rem;
 	border-radius: 10px;
 	padding: 0.5rem 2rem;
 	cursor: pointer;
-	transition: all 400ms;
+	transition: scale 400ms;
 }
 
 .btnLinks a:hover {
-	transition: all 200ms;
+	transition: scale 200ms;
 	scale: 1.1;
 	text-decoration: none;
 }
@@ -151,6 +166,7 @@ body {
 	align-self: center;
 	position: relative;
 	width: 30vw;
+	max-width: 550px;
 	aspect-ratio: 1;
 	animation: spin 100s linear infinite;
 }
@@ -236,7 +252,6 @@ body {
 	grid-template-rows: repeat(2, 50%);
 	align-items: flex-end;
 	gap: 1rem;
-	/* border-left: 2px solid var(--c-black); */
 }
 
 .display :nth-child(1) {
@@ -264,11 +279,11 @@ body {
 	width: 9rem;
 	height: 13rem;
 	background-color: var(--c-main-500);
-	transition: all 400ms;
+	transition: translate 400ms;
 }
 
 .project:hover {
-	transition: all 200ms;
+	transition: translate 200ms;
 	translate: 0 -10px;
 }
 
@@ -299,6 +314,16 @@ a:hover {
 	text-decoration: underline;
 }
 
+@media screen and (min-height: 700px) {
+	.intro {
+		align-self: flex-end;
+		margin-bottom: 1rem;
+	}
+	.btnLinks {
+		margin-top: 1rem;
+	}
+}
+
 @media screen and (max-width: 910px) {
 	.bigCookie {
 		display: none;
@@ -309,10 +334,108 @@ a:hover {
 }
 
 @media screen and (max-width: 760px) {
-	.navbar ul {
+	.navbar .list {
 		gap: 1rem;
 	}
-	.navbar ul li a {
+	.navbar .list li a {
 		padding: 0 0.5rem;
+	}
+}
+
+@media screen and (max-width: 700px) {
+	.content {
+		grid-template-rows: revert;
+	}
+	.intro {
+		justify-self: center;
+	}
+	.btnLinks {
+		flex-direction: row;
+		justify-content: center;
+		gap: 2rem;
+	}
+	.display {
+		grid-row: revert;
+		grid-column: revert;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+	.display :nth-child(3) {
+		align-self: center;
+	}
+}
+
+@media screen and (max-width: 580px) {
+	.siteLink {
+		border: none;
+	}
+	.navbar {
+		position: relative;
+		padding: 0 0.5rem;
+	}
+	.navbar .list {
+		background-color: var(--c-main-600);
+		position: absolute;
+		top: 100%;
+		left: 0;
+		width: 100%;
+		height: 3rem;
+		justify-content: space-evenly;
+		display: none;
+	}
+	.navbar .list li {
+		padding-top: 1rem;
+		padding-bottom: 0.5rem;
+	}
+	.navbar .openLinks {
+		display: block;
+	}
+	.navbar .openLinks:hover + .list,
+	.navbar .list:hover {
+		display: flex;
+	}
+	.content {
+		margin: 0;
+		display: flex;
+		flex-direction: column;
+	}
+	.intro,
+	.btnLinks {
+		align-self: center;
+	}
+	.btnLinks a {
+		line-height: 1rem;
+		padding: 0.5rem 1rem;
+	}
+	.display {
+		padding: 1.5rem;
+		flex-direction: column;
+		justify-content: flex-start;
+	}
+	.project {
+		flex-direction: row;
+		width: 100%;
+		height: 8rem;
+	}
+	.project:hover {
+		transition: all 200ms;
+		translate: 10px;
+	}
+	.project .thumbnail {
+		border-bottom-left-radius: 0;
+		border-top-right-radius: var(--corners);
+		border-bottom: none;
+		border-right: 2px solid var(--c-main-400);
+	}
+	.project .description {
+		padding: 0.5rem;
+	}
+}
+
+@media screen and (max-width: 580px) {
+	.navbar .list {
+		justify-content: center;
+		gap: 0.2rem;
 	}
 }
