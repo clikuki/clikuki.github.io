@@ -18,7 +18,7 @@
 }
 
 .sectionHeader {
-	border-bottom: 1px solid black;
+	border-bottom: 1px solid var(--c-black);
 	margin-top: 0;
 }
 
