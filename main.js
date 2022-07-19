@@ -61,8 +61,10 @@ if (bigCookie) {
 		smallCookies.push(smallCookie);
 	});
 	(function loop() {
-		smallCookies.forEach((cookie) => cookie.update());
-		smallCookies.filter((cookie) => !cookie.isDead);
+		smallCookies = smallCookies.filter((cookie) => {
+			cookie.update();
+			return !cookie.isDead;
+		});
 		requestAnimationFrame(loop);
 	})();
 }
