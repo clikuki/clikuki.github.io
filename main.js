@@ -9,9 +9,9 @@ if (bigCookie) {
 			this.elem = document.createElement('div');
 			this.elem.classList.add('smallCookie');
 			this.opacity = 1;
-			this.pos = { x, y };
-			this.vel = { x: randomFloat(5, -5), y: randomFloat(-10) };
 			this.size = randomFloat(30, 10);
+			this.pos = { x: x - this.size / 2, y: y - this.size / 2 };
+			this.vel = { x: randomFloat(5, -5), y: randomFloat(-10) };
 			this.elem.style.setProperty('--left', `${x}px`);
 			this.elem.style.setProperty('--top', `${y}px`);
 			this.elem.style.setProperty('--size', `${this.size}px`);
