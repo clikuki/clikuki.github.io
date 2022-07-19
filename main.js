@@ -1,7 +1,7 @@
 const bigCookie = document.querySelector('.bigCookie');
 if (bigCookie) {
-	function randomInt(max, min = 0) {
-		return Math.floor(Math.random() * (max - min) + min);
+	function randomFloat(max, min = 0) {
+		return Math.random() * (max - min) + min;
 	}
 
 	class Cookie {
@@ -10,8 +10,8 @@ if (bigCookie) {
 			this.elem.classList.add('smallCookie');
 			this.opacity = 1;
 			this.pos = { x, y };
-			this.vel = { x: randomInt(5, -5), y: randomInt(-10) };
-			this.size = randomInt(30, 10);
+			this.vel = { x: randomFloat(5, -5), y: randomFloat(-10) };
+			this.size = randomFloat(30, 10);
 			this.elem.style.setProperty('--left', `${x}px`);
 			this.elem.style.setProperty('--top', `${y}px`);
 			this.elem.style.setProperty('--size', `${this.size}px`);
@@ -20,6 +20,7 @@ if (bigCookie) {
 			if (this.isDead) return;
 			this.pos.x += this.vel.x;
 			this.pos.y += this.vel.y;
+			// Constrain from screen edges
 			if (this.pos.x < 0) {
 				this.pos.x = 0;
 				this.vel.x = -this.vel.x;
@@ -34,13 +35,13 @@ if (bigCookie) {
 				this.pos.y = innerHeight - this.size;
 				this.vel.y = (-this.vel.y / 4) * 3; // Dampen bouncing
 			}
+			// when on floor
 			if (this.pos.y + this.size >= innerHeight) {
-				// Dampen speed when on floor
-				this.vel.x = this.vel.x * 0.9;
+				this.vel.x = this.vel.x * 0.9; // Dampen speed
+				this.opacity -= 0.004; // Lower opacity
+				this.elem.style.opacity = this.opacity;
 			}
 			this.vel.y += 1; // Gravity
-			this.opacity -= 0.004; // Lower opacity on each frame
-			this.elem.style.opacity = this.opacity;
 			this.elem.style.setProperty('--left', `${this.pos.x}px`);
 			this.elem.style.setProperty('--top', `${this.pos.y}px`);
 			if (this.opacity <= 0) {
