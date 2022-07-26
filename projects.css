@@ -33,19 +33,25 @@
 
 .item .text {
 	flex-grow: 1;
+	--padding: 0.5rem;
 }
 
 .item .name {
-	margin: 0 0 0.3rem 0;
+	margin: 0;
 	border-bottom: 1px solid var(--c-black);
-	padding-left: 0.5rem;
+	padding-left: var(--padding);
 	font-weight: bold;
 	font-size: 1.3rem;
 }
 
+.item .date {
+	padding-left: var(--padding);
+	font-size: small;
+}
+
 .item .description {
 	margin: 0;
-	padding-left: 0.5rem;
+	padding-left: var(--padding);
 }
 
 @media screen and (max-width: 480px) {
