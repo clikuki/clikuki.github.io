@@ -1,5 +1,5 @@
 .content {
-	margin: 0 3rem;
+	margin: 1rem 3rem 0 3rem;
 	padding: 1rem;
 	display: flex;
 }
@@ -8,7 +8,6 @@
 	--size: 300px;
 	width: var(--size);
 	height: var(--size);
-	border-radius: 50%;
 	float: left;
 	margin: 0 1rem 1rem 0;
 }
@@ -30,6 +29,21 @@
 .paragraph,
 .link {
 	padding-left: 1rem;
+}
+
+.link {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	color: inherit;
+}
+
+.link:not(:hover) {
+	text-decoration: none;
+}
+
+.link img {
+	width: 1.3rem;
 }
 
 @media screen and (max-width: 670px) {

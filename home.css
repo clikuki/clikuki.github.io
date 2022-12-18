@@ -37,7 +37,7 @@
 
 .btnLinks a {
 	height: 100%;
-	width: fit-content;
+	width: 7rem;
 	border: 2px solid var(--c-main-400);
 	background-color: var(--c-main-500);
 	text-align: center;
@@ -45,14 +45,14 @@
 	border-radius: 10px;
 	padding: 0.5rem 2rem;
 	cursor: pointer;
-	transition: scale 400ms;
 	text-decoration: none;
 	color: inherit;
+	transition: translate 200ms;
+	box-sizing: content-box;
 }
 
 .btnLinks a:hover {
-	transition: scale 200ms;
-	scale: 1.1;
+	translate: 0.5rem;
 }
 
 .bigCookie {
@@ -62,7 +62,7 @@
 	width: 25vw;
 	max-width: 550px;
 	aspect-ratio: 1;
-	animation: spin 100s linear infinite;
+	animation: spin 130s linear infinite;
 }
 
 @keyframes spin {
@@ -79,7 +79,7 @@
 	width: 50%;
 	height: 50%;
 	border-radius: 50%;
-	background-image: url(assets/cookie.jpg);
+	background-image: url(assets/real_cookie.jpg);
 	background-size: 100%;
 	z-index: -1;
 }
@@ -90,7 +90,7 @@
 }
 
 .bigCookie.jsEnabled:hover {
-	scale: 1.05;
+	scale: 1.03;
 }
 
 .bigCookie :nth-child(1) {
@@ -166,7 +166,7 @@
 	grid-template-columns: repeat(2, 50%);
 	grid-template-rows: repeat(2, 50%);
 	align-items: flex-end;
-	gap: 1rem;
+	gap: 1.5rem 1rem;
 }
 
 .display :nth-child(1) {
@@ -184,11 +184,10 @@
 }
 
 .project {
-	--corners: 10px;
+	--corners: 0.2rem;
 	display: flex;
 	flex-direction: column;
 	text-decoration: none !important;
-	border: 2px solid var(--c-main-400);
 	overflow: hidden;
 	border-radius: var(--corners);
 	width: 9rem;
@@ -196,6 +195,7 @@
 	background-color: var(--c-main-500);
 	transition: translate 400ms;
 	color: inherit;
+	box-shadow: 0 0 0.4rem black;
 }
 
 .project:hover {

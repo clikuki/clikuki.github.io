@@ -63,7 +63,6 @@ body {
 }
 
 .navbar .list a {
-	transition: transform 500ms;
 	display: flex;
 	align-items: center;
 	height: 100%;
@@ -79,8 +78,6 @@ body {
 }
 
 .navbar .list a:hover {
-	transition: transform 200ms;
-	transform: translateY(-5px);
 	text-decoration: underline;
 }
 
