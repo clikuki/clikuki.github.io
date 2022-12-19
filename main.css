@@ -32,7 +32,7 @@ header {
 	box-shadow: 0 -5px 10px black;
 }
 
-header .links {
+header nav {
 	display: flex;
 	height: 100%;
 }
@@ -44,7 +44,7 @@ header .openLinks {
 	cursor: pointer;
 }
 
-header .list {
+header ul {
 	list-style: none;
 	display: flex;
 	justify-content: center;
@@ -54,14 +54,14 @@ header .list {
 	padding: 0;
 }
 
-header .list li {
+header ul li {
 	transition: background-color 500ms;
 	height: 100%;
 	display: flex;
 	align-items: center;
 }
 
-header .list a {
+header ul a {
 	display: flex;
 	align-items: center;
 	height: 100%;
@@ -71,12 +71,12 @@ header .list a {
 	color: inherit;
 }
 
-header .list li:hover {
+header ul li:hover {
 	transition: background-color 200ms;
 	background-color: var(--c-main-400);
 }
 
-header .list a:hover {
+header ul a:hover {
 	text-decoration: underline;
 }
 
@@ -111,10 +111,10 @@ header .list a:hover {
 }
 
 @media screen and (max-width: 760px) {
-	header .list {
+	header ul {
 		gap: 1rem;
 	}
-	header .list li a {
+	header ul li a {
 		padding: 0 0.5rem;
 	}
 }
@@ -127,7 +127,7 @@ header .list a:hover {
 		position: relative;
 		padding: 0 0.5rem;
 	}
-	.navbar .list {
+	.navbar ul {
 		background-color: var(--c-main-600);
 		position: absolute;
 		top: 100%;
@@ -141,15 +141,15 @@ header .list a:hover {
 		gap: 0.2rem;
 		opacity: 0;
 	}
-	.navbar .list li {
+	.navbar ul li {
 		padding-top: 1rem;
 		padding-bottom: 0.5rem;
 	}
 	.navbar .openLinks {
 		display: block;
 	}
-	.navbar .openLinks:hover + .list,
-	.navbar .list:hover {
+	.navbar .openLinks:hover + ul,
+	.navbar ul:hover {
 		height: 4rem;
 		opacity: 1;
 	}
