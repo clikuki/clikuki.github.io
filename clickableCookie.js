@@ -1,4 +1,4 @@
-const bigCookie = document.querySelector('.bigCookie');
+const bigCookie = document.querySelector('.cookie');
 if (bigCookie) {
 	function randomFloat(max, min = 0) {
 		return Math.random() * (max - min) + min;
@@ -7,14 +7,18 @@ if (bigCookie) {
 	class Cookie {
 		constructor(x, y) {
 			this.elem = document.createElement('div');
-			this.elem.classList.add('smallCookie');
+			this.elem.classList.add('cookieBits');
 			this.opacity = 1;
-			this.size = randomFloat(30, 10);
+			this.size = randomFloat(30, 30);
 			this.pos = { x: x - this.size / 2, y: y - this.size / 2 };
-			this.vel = { x: randomFloat(5, -5), y: randomFloat(-10) };
+			this.vel =
+				Math.random() < 0.1
+					? { x: randomFloat(30, -30), y: randomFloat(-40) }
+					: { x: randomFloat(5, -5), y: randomFloat(-10) };
 			this.elem.style.setProperty('--left', `${x}px`);
 			this.elem.style.setProperty('--top', `${y}px`);
 			this.elem.style.setProperty('--size', `${this.size}px`);
+			this.elem.style.setProperty('--rotation', `${Math.random() * 360}deg`);
 		}
 		update() {
 			if (this.isDead) return;

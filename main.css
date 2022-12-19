@@ -20,7 +20,7 @@ body {
 	flex-direction: column;
 }
 
-.navbar {
+header {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
@@ -32,37 +32,36 @@ body {
 	box-shadow: 0 -5px 10px black;
 }
 
-.navbar .links {
+header .links {
 	display: flex;
 	height: 100%;
 }
 
-.navbar .openLinks {
+header .openLinks {
 	background-color: transparent;
 	border: none;
 	display: none;
 	cursor: pointer;
 }
 
-.navbar .list {
+header .list {
 	list-style: none;
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	gap: 3rem;
 	height: 100%;
 	margin: 0;
 	padding: 0;
 }
 
-.navbar .list li {
+header .list li {
 	transition: background-color 500ms;
 	height: 100%;
 	display: flex;
 	align-items: center;
 }
 
-.navbar .list a {
+header .list a {
 	display: flex;
 	align-items: center;
 	height: 100%;
@@ -72,12 +71,12 @@ body {
 	color: inherit;
 }
 
-.navbar .list li:hover {
+header .list li:hover {
 	transition: background-color 200ms;
 	background-color: var(--c-main-400);
 }
 
-.navbar .list a:hover {
+header .list a:hover {
 	text-decoration: underline;
 }
 
@@ -112,10 +111,10 @@ body {
 }
 
 @media screen and (max-width: 760px) {
-	.navbar .list {
+	header .list {
 		gap: 1rem;
 	}
-	.navbar .list li a {
+	header .list li a {
 		padding: 0 0.5rem;
 	}
 }
