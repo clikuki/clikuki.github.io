@@ -12,7 +12,7 @@ if (bigCookie) {
 			this.size = randomFloat(30, 30);
 			this.pos = { x: x - this.size / 2, y: y - this.size / 2 };
 			this.vel =
-				Math.random() < 0.1
+				Math.random() < 0.1 // 10% chance of a stronger velocity
 					? { x: randomFloat(30, -30), y: randomFloat(-40) }
 					: { x: randomFloat(5, -5), y: randomFloat(-10) };
 			this.elem.style.setProperty('--left', `${x}px`);
@@ -56,16 +56,16 @@ if (bigCookie) {
 	}
 
 	bigCookie.classList.add('jsEnabled');
-	let smallCookies = [];
+	let cookieBits = [];
 	const smallCookieContainer = document.createElement('div');
 	document.body.appendChild(smallCookieContainer);
 	bigCookie.addEventListener('click', (e) => {
 		const smallCookie = new Cookie(e.pageX, e.pageY);
 		smallCookieContainer.appendChild(smallCookie.elem);
-		smallCookies.push(smallCookie);
+		cookieBits.push(smallCookie);
 	});
 	(function loop() {
-		smallCookies = smallCookies.filter((cookie) => {
+		cookieBits = cookieBits.filter((cookie) => {
 			cookie.update();
 			return !cookie.isDead;
 		});
