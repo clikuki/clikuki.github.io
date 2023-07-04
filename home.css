@@ -12,10 +12,12 @@
 	display: flex;
 	width: fit-content;
 	flex-direction: column;
+	isolation: isolate;
 }
 
 .intro .intro-top {
 	margin-left: 5px;
+	z-index: 1;
 }
 
 .intro .intro-name {
@@ -62,26 +64,9 @@
 	width: 25vw;
 	max-width: 550px;
 	aspect-ratio: 1;
-	animation: spin 130s linear infinite;
-}
-
-@keyframes spin {
-	from {
-		rotate: 0deg;
-	}
-	to {
-		rotate: 360deg;
-	}
-}
-
-.cookie div {
-	position: absolute;
-	width: 50%;
-	height: 50%;
-	border-radius: 50%;
-	background-image: url(assets/real_cookie.jpg);
-	background-size: 100%;
-	z-index: -1;
+	background: url(assets/cookie.png) no-repeat;
+	background-size: cover;
+	border-radius: 33%;
 }
 
 .cookie.jsEnabled {
@@ -93,71 +78,69 @@
 	scale: 1.03;
 }
 
-.cookie :nth-child(1) {
-	top: 10%;
-	left: 2%;
+.cookie.shake {
+	animation: shake 300ms ease-in-out;
 }
 
-.cookie :nth-child(2) {
-	bottom: 8%;
-	right: 2%;
+@keyframes shake {
+	0% {
+		rotate: 0deg;
+	}
+	20% {
+		rotate: 3deg;
+	}
+	70% {
+		rotate: -3deg;
+	}
+	90% {
+		rotate: 1deg;
+	}
+	100% {
+		rotate: 0deg;
+	}
 }
 
-.cookie :nth-child(3) {
-	top: 2%;
-	right: 8%;
-}
-
-.cookie :nth-child(4) {
-	bottom: 2%;
-	left: 8%;
-}
-
-.cookie :nth-child(5) {
-	bottom: 10%;
-	left: 1%;
-}
-
-.cookie :nth-child(6) {
+.cookieBitContainer {
+	position: absolute;
+	top: 0;
+	left: 0;
 	width: 100%;
 	height: 100%;
+	overflow: hidden;
+	pointer-events: none;
 }
 
-.cookie :nth-child(7) {
-	top: 50%;
-	left: 10%;
-	width: 30%;
-	height: 30%;
-	background-size: 100%;
-}
-
-.cookie :nth-child(8) {
-	top: 41%;
-	left: 66%;
-	width: 30%;
-	height: 30%;
-	background-size: 100%;
-}
-
-.cookie :nth-child(9) {
-	top: 27%;
-	left: 60%;
-	width: 30%;
-	height: 30%;
-	background-size: 100%;
-}
-
-.cookieBits {
-	width: var(--size, 1px);
-	height: var(--size, 1px);
-	rotate: var(--rotation, 0deg);
-	background-image: url(assets/real_cookie.jpg);
-	background-size: 100%;
-	border-radius: 50%;
+.cookieBit {
 	position: absolute;
 	top: var(--top);
 	left: var(--left);
+	width: var(--size, 1px);
+	height: var(--size, 1px);
+	rotate: var(--rotation, 0deg);
+	background: url(assets/cookie.png) no-repeat;
+	background-size: cover;
 	pointer-events: none;
+}
+
+.splashBit {
+	position: absolute;
+	width: var(--size, 1px);
+	height: var(--size, 1px);
+	top: var(--top);
+	left: var(--left);
+	background: url(assets/cookie.png) no-repeat;
+	background-size: 200%;
+	background-position: var(--offset-left) var(--offset-top);
+	pointer-events: none;
+}
+
+.cookieCrack {
+	position: absolute;
+	width: var(--size);
+	height: var(--size);
+	left: var(--left);
+	top: var(--top);
+	rotate: var(--rotation, 0deg);
 }
 
 .display {
@@ -234,7 +217,7 @@
 }
 
 @media screen and (max-width: 910px) {
-	.bigCookie {
+	.cookie {
 		display: none;
 	}
 	.content {
