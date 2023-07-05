@@ -168,7 +168,7 @@ if (bigCookie) {
 			crack.img.style.opacity = crack.opacity;
 			const isDead = crack.opacity < 0;
 			if (isDead) {
-				cracks.img.remove();
+				crack.img.remove();
 				const last = cracks.length - 1;
 				[cracks[i--], cracks[last]] = [cracks[last], cracks[i]];
 				cracks.pop();
