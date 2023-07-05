@@ -117,9 +117,10 @@
 	width: var(--size, 1px);
 	height: var(--size, 1px);
 	rotate: var(--rotation, 0deg);
+	opacity: var(--opacity, 1);
 	background: url(assets/cookie.png) no-repeat;
 	background-size: cover;
-	pointer-events: none;
+	pointer-events: all;
 }
 
 .splashBit {

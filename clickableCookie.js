@@ -4,6 +4,82 @@ if (bigCookie) {
 		return Math.random() * (max - min) + min;
 	}
 
+	bigCookie.classList.add('jsEnabled');
+	const cookieBits = [];
+	const cracks = [];
+	let draggedBit;
+	let timeOfClick = NaN;
+	const waitBeforeDrag = 200;
+	const mousePos = {
+		x: NaN,
+		y: NaN,
+	};
+
+	const cookieContainer = document.createElement('div');
+	cookieContainer.classList.add('cookieBitContainer');
+	document.body.appendChild(cookieContainer);
+
+	bigCookie.addEventListener('click', (e) => {
+		timeOfClick = Date.now();
+
+		const bigCookiePos = bigCookie.getBoundingClientRect();
+		const crack = {
+			opacity: 1,
+			img: document.createElement('img'),
+		};
+		const crackSize = 30;
+		crack.img.src = 'assets/crack.png';
+		crack.img.classList.add('cookieCrack');
+		crack.img.style.setProperty('--size', `${crackSize}px`);
+		crack.img.style.setProperty(
+			'--left',
+			`${e.pageX - crackSize / 2 - bigCookiePos.x}px`,
+		);
+		crack.img.style.setProperty(
+			'--top',
+			`${e.pageY - crackSize / 2 - bigCookiePos.y}px`,
+		);
+		crack.img.style.setProperty('--rotation', `${randomFloat(0, 359)}deg`);
+		bigCookie.appendChild(crack.img);
+		cracks.push(crack);
+
+		const cookieBit = new CookieBit(e.pageX, e.pageY);
+		cookieContainer.appendChild(cookieBit.elem);
+		cookieBits.push(cookieBit);
+
+		// Create 2 splash bits at each of the 4 diagonals
+		for (const x of [-1, 1]) {
+			for (const y of [-1, 1]) {
+				for (let i = 0; i < 2; i++) {
+					const splashBit = new SplashBit(e.pageX, e.pageY, [x, y]);
+					cookieContainer.appendChild(splashBit.elem);
+					cookieBits.push(splashBit);
+				}
+			}
+		}
+
+		if (bigCookie.classList.contains('shake'))
+			bigCookie.classList.remove('shake');
+		setTimeout(() => bigCookie.classList.add('shake'));
+	});
+
+	bigCookie.addEventListener('animationend', () => {
+		bigCookie.classList.remove('shake');
+	});
+
+	document.addEventListener('mouseup', () => {
+		if (draggedBit) {
+			draggedBit.elem.style.cursor = 'auto';
+		}
+		draggedBit = undefined;
+		document.body.style.userSelect = 'auto';
+		document.body.style.pointerEvents = 'all';
+	});
+	document.addEventListener('mousemove', ({ x, y }) => {
+		mousePos.x = x;
+		mousePos.y = y;
+	});
+
 	class CookieBit {
 		constructor(x, y) {
 			this.elem = document.createElement('div');
@@ -17,10 +93,26 @@ if (bigCookie) {
 					: { x: randomFloat(-5, 5), y: randomFloat(0, -10) };
 			this.rotation = randomFloat(0, 360);
 
+			this.elem.addEventListener('mousedown', (e) => {
+				if (timeOfClick + waitBeforeDrag > Date.now()) return;
+				draggedBit = this;
+				this.attractTowards(e.x, e.y);
+				document.body.style.userSelect = 'none';
+				document.body.style.pointerEvents = 'none';
+				this.elem.style.cursor = 'grabbing';
+			});
+
+			this.elem.style.pointerEvents = 'none';
+			setTimeout(() => (this.elem.style.pointerEvents = 'all'), waitBeforeDrag);
+
 			this.elem.style.setProperty('--left', `${this.pos.x}px`);
 			this.elem.style.setProperty('--top', `${this.pos.y}px`);
 			this.elem.style.setProperty('--size', `${this.size}px`);
 			this.elem.style.setProperty('--rotation', `${this.rotation}deg`);
+		}
+		attractTowards(x, y) {
+			this.vel.x = x - (this.pos.x + this.size / 2);
+			this.vel.y = y - (this.pos.y + this.size / 2);
 		}
 		update() {
 			if (this.isDead) return;
@@ -45,12 +137,15 @@ if (bigCookie) {
 				this.vel.y = (-this.vel.y / 4) * 3; // Dampen bouncing
 			}
 
+			// Return opacity to normal
+			if (draggedBit === this && this.opacity < 1) {
+				this.opacity += 0.01;
+			}
 			// when on floor
-			if (this.pos.y + this.size >= innerHeight) {
+			else if (this.pos.y + this.size >= innerHeight) {
 				this.vel.x = this.vel.x * 0.9; // Dampen speed
 				this.rotation += this.vel.x * 0.5; // Rotate faster
 				this.opacity -= 0.004; // Lower opacity
-				this.elem.style.opacity = this.opacity;
 			}
 
 			// Add gravity last so that constraints don't affect it
@@ -59,6 +154,7 @@ if (bigCookie) {
 			this.elem.style.setProperty('--left', `${this.pos.x}px`);
 			this.elem.style.setProperty('--top', `${this.pos.y}px`);
 			this.elem.style.setProperty('--rotation', `${this.rotation}deg`);
+			this.elem.style.setProperty('--opacity', String(this.opacity));
 
 			this.isDead = this.opacity <= 0;
 			if (this.isDead) this.elem.remove();
@@ -105,66 +201,13 @@ if (bigCookie) {
 		}
 	}
 
-	bigCookie.classList.add('jsEnabled');
-	const cookieBits = [];
-	const cracks = [];
-	const cookieContainer = document.createElement('div');
-	cookieContainer.classList.add('cookieBitContainer');
-	document.body.appendChild(cookieContainer);
-
-	bigCookie.addEventListener('click', (e) => {
-		const bigCookiePos = bigCookie.getBoundingClientRect();
-		const crack = {
-			opacity: 1,
-			img: document.createElement('img'),
-		};
-		const crackSize = 30;
-		crack.img.src = 'assets/crack.png';
-		crack.img.classList.add('cookieCrack');
-		crack.img.style.setProperty('--size', `${crackSize}px`);
-		crack.img.style.setProperty(
-			'--left',
-			`${e.pageX - crackSize / 2 - bigCookiePos.x}px`,
-		);
-		crack.img.style.setProperty(
-			'--top',
-			`${e.pageY - crackSize / 2 - bigCookiePos.y}px`,
-		);
-		crack.img.style.setProperty('--rotation', `${randomFloat(0, 359)}deg`);
-		bigCookie.appendChild(crack.img);
-		cracks.push(crack);
-
-		const cookieBit = new CookieBit(e.pageX, e.pageY);
-		cookieContainer.appendChild(cookieBit.elem);
-		cookieBits.push(cookieBit);
-
-		// Create 2 splash bits at each of the 4 diagonals
-		for (const x of [-1, 1]) {
-			for (const y of [-1, 1]) {
-				for (let i = 0; i < 2; i++) {
-					const splashBit = new SplashBit(e.pageX, e.pageY, [x, y]);
-					cookieContainer.appendChild(splashBit.elem);
-					cookieBits.push(splashBit);
-				}
-			}
-		}
-
-		if (bigCookie.classList.contains('shake'))
-			bigCookie.classList.remove('shake');
-		setTimeout(() => bigCookie.classList.add('shake'));
-	});
-
-	bigCookie.addEventListener('animationend', () => {
-		bigCookie.classList.remove('shake');
-	});
-
 	(function loop() {
 		for (let i = 0; i < cookieBits.length; i++) {
 			cookieBits[i].update();
 			if (cookieBits[i].isDead) {
 				const last = cookieBits.length - 1;
 				[cookieBits[i--], cookieBits[last]] = [cookieBits[last], cookieBits[i]];
-				cookieBits.pop();
+				if (cookieBits.pop() === draggedBit) draggedBit = undefined;
 			}
 		}
 		for (let i = 0; i < cracks.length; i++) {
@@ -179,6 +222,7 @@ if (bigCookie) {
 				cracks.pop();
 			}
 		}
+		if (draggedBit) draggedBit.attractTowards(mousePos.x, mousePos.y);
 		requestAnimationFrame(loop);
 	})();
 }
