@@ -9,21 +9,24 @@ if (bigCookie) {
 			this.elem = document.createElement('div');
 			this.elem.classList.add('cookieBit');
 			this.opacity = 1;
-			this.size = randomFloat(30, 30);
+			this.size = randomFloat(30, 40);
 			this.pos = { x: x - this.size / 2, y: y - this.size / 2 };
 			this.vel =
 				Math.random() < 0.1 // 10% chance of a stronger velocity
 					? { x: randomFloat(-30, 30), y: randomFloat(0, -30) }
 					: { x: randomFloat(-5, 5), y: randomFloat(0, -10) };
+			this.rotation = randomFloat(0, 360);
+
 			this.elem.style.setProperty('--left', `${this.pos.x}px`);
 			this.elem.style.setProperty('--top', `${this.pos.y}px`);
 			this.elem.style.setProperty('--size', `${this.size}px`);
-			this.elem.style.setProperty('--rotation', `${Math.random() * 360}deg`);
+			this.elem.style.setProperty('--rotation', `${this.rotation}deg`);
 		}
 		update() {
 			if (this.isDead) return;
 			this.pos.x += this.vel.x;
 			this.pos.y += this.vel.y;
+			this.rotation += this.vel.x * 0.2;
 
 			// Constrain from screen edges
 			if (this.pos.x < 0) {
@@ -45,15 +48,17 @@ if (bigCookie) {
 			// when on floor
 			if (this.pos.y + this.size >= innerHeight) {
 				this.vel.x = this.vel.x * 0.9; // Dampen speed
+				this.rotation += this.vel.x * 0.5; // Rotate faster
 				this.opacity -= 0.004; // Lower opacity
 				this.elem.style.opacity = this.opacity;
 			}
 
-			// Gravity
+			// Add gravity last so that constraints don't affect it
 			this.vel.y += 1;
 
 			this.elem.style.setProperty('--left', `${this.pos.x}px`);
 			this.elem.style.setProperty('--top', `${this.pos.y}px`);
+			this.elem.style.setProperty('--rotation', `${this.rotation}deg`);
 
 			this.isDead = this.opacity <= 0;
 			if (this.isDead) this.elem.remove();
