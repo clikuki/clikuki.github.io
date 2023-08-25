@@ -112,12 +112,7 @@
 
 .cookieBit {
 	position: absolute;
-	top: var(--top);
-	left: var(--left);
-	width: var(--size, 1px);
-	height: var(--size, 1px);
-	rotate: var(--rotation, 0deg);
-	opacity: var(--opacity, 1);
+	aspect-ratio: 1;
 	background: url(assets/cookie.png) no-repeat;
 	background-size: cover;
 	pointer-events: all;
@@ -125,23 +120,15 @@
 
 .splashBit {
 	position: absolute;
-	width: var(--size, 1px);
-	height: var(--size, 1px);
-	top: var(--top);
-	left: var(--left);
+	aspect-ratio: 1;
 	background: url(assets/cookie.png) no-repeat;
 	background-size: 200%;
-	background-position: var(--offset-left) var(--offset-top);
 	pointer-events: none;
 }
 
 .cookieCrack {
 	position: absolute;
-	width: var(--size);
-	height: var(--size);
-	left: var(--left);
-	top: var(--top);
-	rotate: var(--rotation, 0deg);
+	aspect-ratio: 1;
 }
 
 .display {
