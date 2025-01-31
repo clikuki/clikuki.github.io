@@ -64,7 +64,7 @@
 	width: 25vw;
 	max-width: 550px;
 	aspect-ratio: 1;
-	background: url(assets/cookie.png) no-repeat;
+	background: url(/assets/cookie.png) no-repeat;
 	background-size: cover;
 	border-radius: 33%;
 }
@@ -113,7 +113,7 @@
 .cookieBit {
 	position: absolute;
 	aspect-ratio: 1;
-	background: url(assets/cookie.png) no-repeat;
+	background: url(/assets/cookie.png) no-repeat;
 	background-size: cover;
 	pointer-events: all;
 }
@@ -121,7 +121,7 @@
 .splashBit {
 	position: absolute;
 	aspect-ratio: 1;
-	background: url(assets/cookie.png) no-repeat;
+	background: url(/assets/cookie.png) no-repeat;
 	background-size: 200%;
 	pointer-events: none;
 }
