@@ -6,6 +6,7 @@ if (bigCookie) {
 
 	bigCookie.classList.add("jsEnabled");
 	const cookieBits = [];
+	const collidables = Array.from(document.querySelectorAll("[data-collidable]"));
 	let draggedBit;
 	let timeOfClick = NaN;
 	const waitBeforeDrag = 200;
@@ -58,6 +59,8 @@ if (bigCookie) {
 		mousePos.y = y;
 	});
 
+	const logEl = document.getElementById("log");
+	const testEl = document.getElementById("test");
 	class CookieBit {
 		constructor(x, y) {
 			this.elem = document.createElement("div");
@@ -98,7 +101,53 @@ if (bigCookie) {
 			this.vel.x = x - (this.pos.x + this.size / 2);
 			this.vel.y = y - (this.pos.y + this.size / 2);
 		}
+		collide(hitbox) {
+			const rightDistance = this.pos.x + this.size - hitbox.left;
+			const leftDistance = hitbox.right - this.pos.x;
+			const bottomDistance = this.pos.y + this.size - hitbox.top;
+			const topDistance = hitbox.bottom - this.pos.y;
+
+			if (
+				rightDistance >= 0 &&
+				leftDistance >= 0 &&
+				bottomDistance >= 0 &&
+				topDistance >= 0
+			) {
+				const cx = this.pos.x + this.size / 2;
+				const cy = this.pos.y + this.size / 2;
+
+				let testX = cx;
+				let testY = cy;
+				if (cx < hitbox.x) testX = hitbox.x; // left edge
+				else if (cx > hitbox.right) testX = hitbox.right; // right edge
+
+				if (cy < hitbox.y) testY = hitbox.y; // top edge
+				else if (cy > hitbox.bottom) testY = hitbox.bottom; // bottom edge
+
+				testEl.style.left = `${testX}px`;
+				testEl.style.top = `${testY}px`;
+				testEl.style.width = "5px";
+				testEl.style.height = "5px";
+
+				const distX = cx - testX;
+				const distY = cy - testY;
+				const distance = Math.sqrt(distX * distX + distY * distY);
+				logEl.textContent = `distx: ${distX}\ndisty: ${distY}`;
+				if (distance <= this.size / 2) {
+					const normal = {
+						x: (cx - testX) / distance,
+						y: (cy - testY) / distance,
+					};
+					const dot = this.vel.x * normal.x + this.vel.y * normal.y;
+					this.vel = {
+						x: this.vel.x - 2 * dot * normal.x,
+						y: this.vel.y - 2 * dot * normal.y,
+					};
+				}
+			}
+		}
 		update() {
+			// TODO: divide into substeps, and/or look-ahead using velocity
 			if (this.opacity < 0) return;
 			this.pos.x += this.vel.x;
 			this.pos.y += this.vel.y;
@@ -186,9 +235,18 @@ if (bigCookie) {
 		}
 	}
 
-	(function loop() {
+	function loop() {
+		const hitboxes = collidables.map((el) => el.getBoundingClientRect());
+
 		for (let i = 0; i < cookieBits.length; i++) {
 			cookieBits[i].update();
+
+			if (cookieBits[i] instanceof CookieBit) {
+				for (const hitbox of hitboxes) {
+					cookieBits[i].collide(hitbox);
+				}
+			}
+
 			if (cookieBits[i].opacity < 0) {
 				cookieBits[i].elem.remove();
 				const last = cookieBits.length - 1;
@@ -198,5 +256,6 @@ if (bigCookie) {
 		}
 		if (draggedBit) draggedBit.attractTowards(mousePos.x, mousePos.y);
 		requestAnimationFrame(loop);
-	})();
+	}
+	loop();
 }
