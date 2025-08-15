@@ -15,41 +15,35 @@ const { title, projectSrc, thumbnailSrc } = Astro.props;
 
 <style>
 	a {
-		--corners: 0.2rem;
-		display: flex;
-		flex-direction: column;
-		text-decoration: none !important;
+		display: grid;
+		grid-template-rows: 2fr 1fr;
+		justify-items: center;
+		align-items: center;
+		text-decoration: none;
 		overflow: hidden;
-		border-radius: var(--corners);
-		width: 9rem;
-		height: 13rem;
-		background-color: var(--c-main-500);
-		transition: translate 400ms;
+		border-radius: .3rem;
 		color: inherit;
-		box-shadow: 0 0 0.4rem black;
+		background-color: var(--c-light);
+		box-shadow: .3rem .3rem var(--c-darker);
 		user-select: none;
+		transition: translate 500ms;
 	}
-
 	a:hover {
-		transition: translate 200ms;
+		transition: translate 300ms;
 		translate: 0 -10px;
 	}
 
 	a img {
-		max-width: 100%;
-		max-height: 100%;
-		border-bottom: 2px solid var(--c-main-400);
-		border-bottom-left-radius: var(--corners);
-		border-bottom-right-radius: var(--corners);
+		width: 9rem;
+		aspect-ratio: 1;
+		margin: .5rem;
+		border-radius: inherit;
 	}
 
-	a span {
-		display: flex;
+	/* a span {
+		display: grid;
+		height: 100%;
 		align-items: center;
 		justify-content: center;
-		flex-grow: 1;
-		margin: 0;
-		padding-bottom: 0.5rem;
-		text-align: center;
-	}
+	} */
 </style>
