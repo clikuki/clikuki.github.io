@@ -1,5 +1,8 @@
-<section>
+---
+import Display from "./display.astro"
+---
 
+<section>
 	<h1>
 		<span class="top">Hi, I'm</span>
 		<span class="middle">Clikuki</span>
@@ -13,11 +16,7 @@
 	
 	<div class="cookie"></div>
 
-	<div class="display">
-		<div class="box">1</div>
-		<div class="box">2</div>
-		<div class="box">3</div>
-	</div>
+	<Display/>
 </section>
 
 <style>
@@ -29,7 +28,7 @@
 			"header cookie display"
 			"shortcuts cookie display";
 		grid-template-rows: max-content 1fr;
-		grid-template-columns: 1fr max-content 1fr;
+		grid-template-columns: max-content 1fr 1fr;
 		column-gap: 0.5rem;
 	}
 
@@ -40,6 +39,7 @@
 		flex-direction: column;
 		font-weight: normal;
 		font-size: 1rem;
+		margin: 0;
 	}
 	h1 .top {
 		margin-left: 5px;
@@ -77,32 +77,13 @@
 	.cookie {
 		grid-area: cookie;
 		align-self: center;
+		justify-self: center;
 		position: relative;
-		width: 25vw;
-		max-width: 550px;
+		width: 100%;
 		aspect-ratio: 1;
+		image-rendering: crisp-edges;
 		background: url(cookie.png) no-repeat;
 		background-size: cover;
 		border-radius: 33%;
-	}
-
-	.display {
-		grid-area: display;
-		display: grid;
-		grid-template-columns: repeat(2, 50%);
-		grid-template-rows: repeat(2, 50%);
-		align-items: flex-end;
-		gap: 1.5rem 1rem;
-	}
-	.display :nth-child(1) {
-		justify-self: flex-end;
-	}
-	.display :nth-child(2) {
-		justify-self: flex-start;
-	}
-	.display :nth-child(3) {
-		grid-column: 1 / 3;
-		align-self: flex-start;
-		justify-self: center;
 	}
 </style>
