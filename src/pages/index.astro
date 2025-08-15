@@ -1,0 +1,51 @@
+---
+import Hero from "../components/hero.astro";
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+	<meta name="generator" content={Astro.generator}/>
+	<title>Clikuki's Space</title>
+
+	<!-- TODO: Selfhost fonts -->
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+</head>
+<body>
+	<Hero />
+</body>
+</html>
+
+<style>
+	body {
+		--c-main-100: hsl(54, 63%, 70%);
+		--c-main-200: hsl(51, 67%, 65%);
+		--c-main-300: hsl(47, 71%, 60%);
+		--c-main-400: hsl(44, 75%, 50%);
+		--c-main-500: hsl(39, 79%, 45%);
+		--c-main-600: hsl(37, 83%, 40%);
+		--c-main-700: hsl(35, 85%, 35%);
+		--c-main-800: hsl(33, 87%, 30%);
+		--c-main-900: hsl(32, 90%, 25%);
+		--c-white: #eee;
+		--c-black: #222;
+
+		font-family: "Open Sans", sans-serif;
+		font-optical-sizing: auto;
+		font-weight: normal;
+		font-style: normal;
+		font-variation-settings: "wdth" 100;
+
+		margin: 0;
+		background-color: var(--c-white);
+		color: var(--c-black);
+	}
+
+	:global(*) {
+		box-sizing: border-box;
+	}
+</style>
