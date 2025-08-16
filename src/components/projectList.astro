@@ -1,0 +1,36 @@
+---
+import ProjectItem from "./projectItem.astro"
+---
+
+<section>
+	<h2 id="projects">My Projects</h2>
+	<ul>
+		<ProjectItem title="Foo" thumbnailSrc="thumbnails/crossword.png" projectSrc="#" />
+		<ProjectItem title="Bar" thumbnailSrc="thumbnails/chess.png" projectSrc="#" />
+		<ProjectItem title="Baz" thumbnailSrc="thumbnails/concentration.png" projectSrc="#" />
+	</ul>
+</section>
+
+<style>
+	section {
+		box-shadow: inset 0 5rem 3rem -5rem var(--c-darker);
+	}
+
+	h2 {
+		text-align: center;
+		margin: 0;
+		padding: 1rem 0;
+	}
+
+	ul {
+		--size: 13rem;
+		list-style: none;
+		display: grid;
+		grid-template-columns: repeat(auto-fit, var(--size));
+		gap: 1rem;
+		align-items: center;
+		justify-content: center;
+		width: 100%;
+		padding: 0;
+	}
+</style>
