@@ -29,6 +29,7 @@ const { title, projectSrc, thumbnailSrc } = Astro.props;
 		text-decoration: none;
 		box-shadow: .3rem .3rem var(--c-dark);
 		isolation: isolate;
+		transition: box-shadow 500ms;
 	}
 	img {
 		grid-area: sole;
@@ -42,6 +43,9 @@ const { title, projectSrc, thumbnailSrc } = Astro.props;
 		opacity: 0;
 		z-index: 2;
 		transition: opacity 500ms;
+	}
+	a:hover {
+		box-shadow: .3rem .3rem var(--c-darker);
 	}
 	a:hover img {
 		scale: 1.3;
