@@ -23,7 +23,7 @@ import ProjectList from "../components/projectList.astro";
 </html>
 
 <style>
-	body {
+	:root {
 		--c-bg: #F3E9DC;
 		--c-darker: #C75D2C;
 		--c-dark: #D96F32;
@@ -32,7 +32,13 @@ import ProjectList from "../components/projectList.astro";
 		--c-darker: #FEFFC4;
 		--c-dark: #FFBC4C;
 		--c-light: #FFDE63; */
+		
+		scrollbar-color: var(--c-darker) var(--c-light);
+		scrollbar-width: thin;
+  	scroll-behavior: smooth;
+	}
 
+	body {
 		font-family: "Open Sans", sans-serif;
 		font-optical-sizing: auto;
 		font-weight: normal;
@@ -41,7 +47,6 @@ import ProjectList from "../components/projectList.astro";
 
 		margin: 0;
 		background-color: var(--c-bg);
-		color: var(--c-black);
 	}
 
 	:global(*, ::before, ::after) {
