@@ -8,12 +8,10 @@ interface Props {
 const { title, projectSrc, thumbnailSrc } = Astro.props;
 ---
 
-<li>
-	<a href={projectSrc}>
-		<img src={thumbnailSrc} alt={title}>
-		<span>{title}</span>
-	</a>
-</li>
+<a href={projectSrc}>
+	<img src={thumbnailSrc} alt={title}>
+	<span>{title}</span>
+</a>
 
 <style>
 	a {
@@ -32,6 +30,14 @@ const { title, projectSrc, thumbnailSrc } = Astro.props;
 		transition: box-shadow 500ms;
 	}
 	img {
+		text-align: center;
+		background: repeating-linear-gradient(
+			135deg,
+			var(--c-darker) 0px,
+			var(--c-darker) 1rem,
+			var(--c-light) 1rem,
+			var(--c-light) 1.5rem
+		);
 		grid-area: sole;
 		width: 100%;
 		aspect-ratio: 1;

@@ -1,5 +1,5 @@
 ---
-import ProjectHighlight from "./projectHighlight.astro"
+import ProjectItem from "./projectItem.astro"
 ---
 
 <section>
@@ -16,11 +16,11 @@ import ProjectHighlight from "./projectHighlight.astro"
 	
 	<div class="cookie"></div>
 
-	<div class="highlights">
-		<ProjectHighlight title="Foo" thumbnailSrc="thumbnails/crossword.png" projectSrc="#" />
-		<ProjectHighlight title="Bar" thumbnailSrc="thumbnails/chess.png" projectSrc="#" />
-		<ProjectHighlight title="Baz" thumbnailSrc="thumbnails/concentration.png" projectSrc="#" />
-	</div>
+	<ul class="highlights">
+		<li><ProjectItem title="Foo" thumbnailSrc="thumbnails/crossword.png" projectSrc="#" /></li>
+		<li><ProjectItem title="Bar" thumbnailSrc="thumbnails/chess.png" projectSrc="#" /></li>
+		<li><ProjectItem title="Baz" thumbnailSrc="thumbnails/concentration.png" projectSrc="#" /></li>
+	</u>
 </section>
 
 <style>
@@ -95,12 +95,15 @@ import ProjectHighlight from "./projectHighlight.astro"
 	}
 	
 	.highlights {
+		list-style: none;
 		grid-area: display;
 		display: grid;
 		grid-template-columns: repeat(2, 50%);
 		grid-template-rows: repeat(2, 50%);
 		align-items: flex-end;
 		gap: 1.5rem 1rem;
+		padding: 0;
+		margin: 0;
 	}
 	.highlights > :global(:nth-child(1)) {
 		justify-self: flex-end;
