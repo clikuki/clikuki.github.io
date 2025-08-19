@@ -1,6 +1,7 @@
 ---
 import ProjectItem from "./projectItem.astro"
 import { colors, backgroundPatterns } from "../styleConstants";
+import { content } from "../content";
 ---
 
 <section>
@@ -18,9 +19,15 @@ import { colors, backgroundPatterns } from "../styleConstants";
 	<img class="cookie" src="pixel_cookie.png" alt="A big cookie?" draggable="false">
 
 	<ul class="highlights">
-		<li><ProjectItem title="Foo" thumbnailSrc="thumbnails/crossword.png" projectSrc="#" /></li>
-		<li><ProjectItem title="Bar" thumbnailSrc="thumbnails/chess.png" projectSrc="#" /></li>
-		<li><ProjectItem title="Baz" thumbnailSrc="thumbnails/concentration.png" projectSrc="#" /></li>
+		{content.projects.map(proj => {
+			if(proj.isHighlight) return (<li>
+				<ProjectItem
+					title={proj.title}
+					thumbnailSrc={proj.thumbnailSrc}
+					projectSrc={proj.projectSrc}
+				/>
+			</li>)
+		})}
 	</u>
 </section>
 

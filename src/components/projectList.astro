@@ -1,22 +1,20 @@
 ---
 import ProjectItem from "./projectItem.astro"
+import { content } from "../content";
 ---
 
 <section>
 	<h2 id="projects">My Projects</h2>
 	<ul>
-		<li><ProjectItem title="Foo" thumbnailSrc="thumbnails/crossword.png" projectSrc="#" /></li>
-		<li><ProjectItem title="Bar" thumbnailSrc="thumbnails/chess.png" projectSrc="#" /></li>
-		<li><ProjectItem title="Baz" thumbnailSrc="thumbnails/concentration.png" projectSrc="#" /></li>
-		<li><ProjectItem title="Foo" thumbnailSrc="thumbnails/crossword.png" projectSrc="#" /></li>
-		<li><ProjectItem title="Bar" thumbnailSrc="thumbnails/chess.png" projectSrc="#" /></li>
-		<li><ProjectItem title="Baz" thumbnailSrc="thumbnails/concentration.png" projectSrc="#" /></li>
-		<li><ProjectItem title="Foo" thumbnailSrc="thumbnails/crossword.png" projectSrc="#" /></li>
-		<li><ProjectItem title="Bar" thumbnailSrc="thumbnails/chess.png" projectSrc="#" /></li>
-		<li><ProjectItem title="Baz" thumbnailSrc="thumbnails/concentration.png" projectSrc="#" /></li>
-		<li><ProjectItem title="Foo" thumbnailSrc="thumbnails/crossword.png" projectSrc="#" /></li>
-		<li><ProjectItem title="Bar" thumbnailSrc="thumbnails/chess.png" projectSrc="#" /></li>
-		<li><ProjectItem title="Baz" thumbnailSrc="thumbnails/concentration.png" projectSrc="#" /></li>
+		{content.projects.map(proj => (
+			<li>
+				<ProjectItem
+					title={proj.title}
+					thumbnailSrc={proj.thumbnailSrc}
+					projectSrc={proj.projectSrc}
+				/>
+			</li>
+		))}
 	</ul>
 </section>
 

@@ -1,5 +1,6 @@
 ---
 import { colors, backgroundPatterns } from "../styleConstants";
+import { content } from "../content";
 ---
 
 <section>
@@ -14,8 +15,8 @@ import { colors, backgroundPatterns } from "../styleConstants";
 				so I'll keep making some <i>silly</i> stuff.
 			</p>
 			<ul class="socials">
-				<li><a href="#"><img src="github.png" alt=""><span>My Github</span></a></li>
-				<li><a href="#"><img src="reddit.svg" alt=""><span>My Reddit</span></a></li>
+				<li><a href={content.socials.github}><img src="github.png" alt=""><span>My Github</span></a></li>
+				<li><a href={content.socials.reddit}><img src="reddit.svg" alt=""><span>My Reddit</span></a></li>
 			</ul>
 		</div>
 	</div>
