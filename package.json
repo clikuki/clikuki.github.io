@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "astro dev --port 5500",
     "build": "astro build",
-    "preview": "astro preview",
+    "preview": "astro preview --port 5500",
     "astro": "astro"
   },
   "dependencies": {

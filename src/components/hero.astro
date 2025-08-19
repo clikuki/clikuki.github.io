@@ -15,7 +15,7 @@ import { colors, backgroundPatterns } from "../styleConstants";
 		<a href="#about">About Me</a>
 	</div>
 	
-	<div class="cookie"></div>
+	<img class="cookie" src="pixel_cookie.png" alt="A big cookie?" draggable="false">
 
 	<ul class="highlights">
 		<li><ProjectItem title="Foo" thumbnailSrc="thumbnails/crossword.png" projectSrc="#" /></li>
@@ -23,6 +23,13 @@ import { colors, backgroundPatterns } from "../styleConstants";
 		<li><ProjectItem title="Baz" thumbnailSrc="thumbnails/concentration.png" projectSrc="#" /></li>
 	</u>
 </section>
+
+<script>
+	const clickerEl = document.querySelector("img.cookie") as HTMLElement;
+	clickerEl.addEventListener("click", () => {
+		console.log("NOT IMPLEMENTED");
+	})
+</script>
 
 <style define:vars={{"bg-pattern": `url("${backgroundPatterns.whirl(colors.darker, .3)}")`}}>
 	section {
@@ -107,9 +114,8 @@ import { colors, backgroundPatterns } from "../styleConstants";
 		max-width: 26rem;
 		aspect-ratio: 1;
 		image-rendering: crisp-edges;
-		background: url(pixel_cookie.png) no-repeat;
-		background-size: cover;
 		border-radius: 33%;
+		user-select: none;
 	}
 	
 	.highlights {
