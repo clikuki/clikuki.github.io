@@ -1,0 +1,96 @@
+<section>
+	<h2 id="about">About Me</h2>
+	<div class="body">
+		<img class="portrait" src="cookie.jpg" alt="A cookie is me!">
+		<div class="content">
+			<p class="description">
+				Hi, I'm Clikuki, and this place is where I'll put all the stuff I make!
+				I prefer to work with vanilla HTML/CSS/TS, though I'm hoping to use more languages.
+				Right now, I'm working on stuff I find interesting to recreate,
+				so I'll keep making some <i>silly</i> stuff.
+			</p>
+			<ul class="socials">
+				<li><a href="#"><img src="github.png" alt=""><span>My Github</span></a></li>
+				<li><a href="#"><img src="reddit.svg" alt=""><span>My Reddit</span></a></li>
+			</ul>
+		</div>
+	</div>
+</sect>
+
+<style>
+	section {
+		background-image: linear-gradient(to bottom, var(--c-light), var(--c-darker));
+		padding: 1rem;
+	}
+
+	.body {
+		display: flex;
+		gap: 1ch;
+		padding: 0 1rem;
+		gap: 2ch;
+	}
+
+	h2 {
+		text-wrap: nowrap;
+		display: flex;
+		align-items: center;
+		gap: 1ch;
+	}
+	h2::before,
+	h2::after {
+		content: "";
+		width: 100%;
+		height: 2px;
+		background-color: var(--c-darker);
+		border-radius: 1rem;
+		flex-grow: 1;
+	}
+
+	.description {
+		text-align: justify;
+	}
+
+	.socials {
+		list-style: none;
+	}
+	.socials a {
+		margin-top: 1rem;
+		width: max-content;
+		display: flex;
+		align-items: center;
+		gap: 1ch;
+		color: inherit;
+		text-decoration: none;
+	}
+	.socials img {
+		width: 2rem;
+	}
+	.socials [src^="reddit"i] {
+		background-color: white;
+		border-radius: 50%;
+	}
+	.socials span {
+		position: relative;
+	}
+	.socials span::after {
+		content: "";
+		position: absolute;
+		top: 100%;
+		left: 0;
+		width: 0;
+		height: 2px;
+		background: currentColor;
+		border-radius: 1ch;
+		transition: width 500ms;
+	}
+	.socials a:hover span::after {
+		width: 100%;
+	}
+
+	.portrait {
+		text-align: center;
+		width: 15rem;
+		border-radius: .3rem;
+		box-shadow: .3rem .3rem var(--c-dark);
+	}
+</style>
