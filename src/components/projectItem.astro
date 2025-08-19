@@ -25,7 +25,7 @@ const { title, projectSrc, thumbnailSrc } = Astro.props;
 		border-radius: .3rem;
 		color: white;
 		text-decoration: none;
-		box-shadow: .3rem .3rem var(--c-dark);
+		box-shadow: .3rem .3rem var(--dark);
 		isolation: isolate;
 		transition: box-shadow 500ms;
 	}
@@ -33,10 +33,10 @@ const { title, projectSrc, thumbnailSrc } = Astro.props;
 		text-align: center;
 		background: repeating-linear-gradient(
 			135deg,
-			var(--c-darker) 0px,
-			var(--c-darker) 1rem,
-			var(--c-light) 1rem,
-			var(--c-light) 1.5rem
+			var(--darker) 0px,
+			var(--darker) 1rem,
+			var(--light) 1rem,
+			var(--light) 1.5rem
 		);
 		grid-area: sole;
 		width: 100%;
@@ -51,7 +51,7 @@ const { title, projectSrc, thumbnailSrc } = Astro.props;
 		transition: opacity 500ms;
 	}
 	a:hover {
-		box-shadow: .3rem .3rem var(--c-darker);
+		box-shadow: .3rem .3rem var(--darker);
 	}
 	a:hover img {
 		scale: 1.3;

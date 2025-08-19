@@ -2,6 +2,7 @@
 import Hero from "../components/hero.astro";
 import ProjectList from "../components/projectList.astro";
 import AboutMe from "../components/aboutMe.astro";
+import { colors } from "../styleConstants.ts";
 ---
 
 <!DOCTYPE html>
@@ -24,18 +25,9 @@ import AboutMe from "../components/aboutMe.astro";
 </body>
 </html>
 
-<style>
+<style define:vars={colors}>
 	:root {
-		--c-white: #F3E9DC;
-		--c-darker: #C75D2C;
-		--c-dark: #D96F32;
-		--c-light: #F8B259;
-		/* --c-white: #799EFF;
-		--c-darker: #FEFFC4;
-		--c-dark: #FFBC4C;
-		--c-light: #FFDE63; */
-		
-		scrollbar-color: var(--c-darker) var(--c-light);
+		scrollbar-color: var(--darker) var(--light);
 		scrollbar-width: thin;
   	scroll-behavior: smooth;
 	}
@@ -48,7 +40,7 @@ import AboutMe from "../components/aboutMe.astro";
 		font-variation-settings: "wdth" 100;
 
 		margin: 0;
-		background-color: var(--c-white);
+		background-color: var(--white);
 	}
 
 	:global(*, ::before, ::after) {
