@@ -17,8 +17,7 @@ import { content } from "../content";
 	</div>
 	
 	<img class="cookie" src="pixel_cookie.png" alt="A big cookie?" draggable="false">
-	<div class="cookie-bits"></div>
-
+	
 	<ul class="highlights">
 		{content.projects.map(proj => {
 			if(proj.isHighlight) return (<li>
@@ -30,6 +29,8 @@ import { content } from "../content";
 			</li>)
 		})}
 	</u>
+	
+	<div class="cookie-bits"></div>
 </section>
 
 <script src="../cookie.ts"></script>

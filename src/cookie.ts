@@ -26,10 +26,20 @@ class Physics {
 		const maxRadius = 30;
 		const radius = Math.random() * (maxRadius - minRadius) + minRadius;
 		const mass = Math.PI * radius * radius;
+		// const mass = 1;
+
+		const initVelLength = Math.random();
+		const initVelAngle = Math.random() * -Math.PI;
+		const initVelocity = {
+			x: initVelLength * Math.cos(initVelAngle),
+			y: initVelLength * Math.sin(initVelAngle),
+		}
 
 		const obj = new PhysicsObject(
-			x,y,
-			x,y,
+			x,
+			y,
+			x-initVelocity.x,
+			y-initVelocity.y,
 			radius,
 			mass,
 		);
