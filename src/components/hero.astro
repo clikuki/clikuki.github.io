@@ -17,6 +17,7 @@ import { content } from "../content";
 	</div>
 	
 	<img class="cookie" src="pixel_cookie.png" alt="A big cookie?" draggable="false">
+	<div class="cookie-bits"></div>
 
 	<ul class="highlights">
 		{content.projects.map(proj => {
@@ -31,12 +32,7 @@ import { content } from "../content";
 	</u>
 </section>
 
-<script>
-	const clickerEl = document.querySelector("img.cookie") as HTMLElement;
-	clickerEl.addEventListener("click", () => {
-		console.log("NOT IMPLEMENTED");
-	})
-</script>
+<script src="../cookie.ts"></script>
 
 <style define:vars={{"bg-pattern": `url("${backgroundPatterns.whirl(colors.darker, .3)}")`}}>
 	section {
@@ -123,6 +119,44 @@ import { content } from "../content";
 		image-rendering: crisp-edges;
 		border-radius: 33%;
 		user-select: none;
+	}
+	.cookie.js-enabled {
+		cursor: pointer;
+		transition: scale 500ms;
+	}
+	.cookie.js-enabled:hover {
+		scale: 1.03;
+	}
+	.cookie.shake {
+		animation: shake 300ms ease-in-out;
+	}
+	@keyframes shake {
+		0% {
+			rotate: 0deg;
+		}
+		20% {
+			rotate: 3deg;
+		}
+		70% {
+			rotate: -3deg;
+		}
+		90% {
+			rotate: 1deg;
+		}
+		100% {
+			rotate: 0deg;
+		}
+	}
+
+	.cookie-bits {
+		position: absolute;
+		top: 0;
+		left: 0;
+	}
+	.cookie-bits :global(img) {
+		position: absolute;
+		width: 1rem;
+		aspect-ratio: 1;
 	}
 	
 	.highlights {
