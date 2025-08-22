@@ -28,7 +28,7 @@ class Physics {
 		const mass = Math.PI * radius * radius;
 		// const mass = 1;
 
-		const initVelLength = Math.random();
+		const initVelLength = Math.random() + .1;
 		const initVelAngle = Math.random() * -Math.PI;
 		const initVelocity = {
 			x: initVelLength * Math.cos(initVelAngle),
@@ -139,8 +139,8 @@ class Renderer {
 	public add(obj: PhysicsObject): HTMLImageElement {
 		const elem = document.createElement("img");
 		elem.src = Renderer.imgSrc;
-		elem.style.left = `${obj.x}px`;
-		elem.style.top = `${obj.y}px`;
+		elem.style.left = `${obj.x - obj.radius}px`;
+		elem.style.top = `${obj.y - obj.radius}px`;
 		elem.style.width = `${obj.radius + obj.radius}px`;
 
 		this.containerEl.appendChild(elem);
@@ -157,16 +157,19 @@ class Renderer {
 				this.elements.delete(obj);
 			}
 			else {
-				elem.style.left = `${obj.x * alpha + obj.prevX * oneMinusAlpha}px`;
-				elem.style.top = `${obj.y * alpha + obj.prevY * oneMinusAlpha}px`;
+				elem.style.left = `${obj.x * alpha + obj.prevX * oneMinusAlpha - obj.radius}px`;
+				elem.style.top = `${obj.y * alpha + obj.prevY * oneMinusAlpha - obj.radius}px`;
 			}
 		}
 	}
 }
 
 function main() {
+	const msWaitBeforeDrag = 400;
+	
 	const clickerEl = document.querySelector("img.cookie") as HTMLImageElement;
 	const bitContainerEl = document.querySelector(".cookie-bits") as HTMLElement;
+
 	clickerEl.classList.add("js-enabled")
 
 	const physics = new Physics();
@@ -176,10 +179,16 @@ function main() {
 	);
 
 	clickerEl.addEventListener("click", (e) => {
-		renderer.add(physics.spawn(
+		const elem = renderer.add(physics.spawn(
 			e.x,
 			e.y + document.documentElement.scrollTop,
 		))
+		
+		elem.style.pointerEvents = "none";
+		setTimeout(
+			() => elem.style.pointerEvents = "",
+			msWaitBeforeDrag,
+		);
 	})
 
 	try {
