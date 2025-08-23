@@ -14,5 +14,6 @@
 		"alwaysStrict": true,
 		"noUnusedLocals": true,
 		"noUnusedParameters": true,
+		"allowJs": false
 	}
 }
