@@ -1,3 +1,7 @@
 {
-	"liveServer.settings.root": "/dist"
+	// Exclusively for developing the physics
+	"liveServer.settings.root": "./physics_development",
+	"liveServer.settings.mount": [
+		["/", "./public"]
+	]
 }
