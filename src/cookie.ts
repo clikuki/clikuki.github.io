@@ -31,8 +31,10 @@ class Physics {
 		const initVelLength = Math.random() + .1;
 		const initVelAngle = Math.random() * -Math.PI;
 		const initVelocity = {
-			x: initVelLength * Math.cos(initVelAngle),
-			y: initVelLength * Math.sin(initVelAngle),
+			// x: initVelLength * Math.cos(initVelAngle),
+			// y: initVelLength * Math.sin(initVelAngle),
+			x: 0,
+			y: 0,
 		}
 
 		const obj = new PhysicsObject(
@@ -74,24 +76,35 @@ class Physics {
 		}
 	}
 	private checkBounds(): void {
-		// TODO: Need to flip velocity
 		for(const obj of this.objects) {
-			if(obj.x + obj.radius > innerWidth) {
-				obj.isDead = true;
-				// obj.x = innerWidth - obj.x;
+			const rightSide = obj.x + obj.radius > innerWidth;
+			const leftSide = obj.x - obj.radius < 0;
+			const bottomSide = obj.y + obj.radius > innerHeight;
+			const topSide = obj.y - obj.radius < 0;
+
+			if(leftSide || rightSide) {
+				const currXVel = obj.x - obj.prevX;
+				this.applyForce(obj, { x: -currXVel*2, y: 0});
+				// obj.prevX = obj.x + currXVel;
 			}
-			else if(obj.x - obj.radius < 0) {
-				obj.isDead = true;
-				// obj.x = obj.x;
+			else if (topSide || bottomSide) {
+				const currYVel = obj.y - obj.prevY;
+				this.applyForce(obj, { x: 0, y: -currYVel*2});
+				// obj.prevY = obj.y + currYVel;
+			}
+
+			if(rightSide) {
+				obj.x = innerWidth - obj.radius;
+			}
+			else if(leftSide) {
+				obj.x = obj.x;
 			}
 			
-			if(obj.y + obj.radius > innerHeight) {
-				obj.isDead = true;
-				// obj.y = innerHeight - obj.y;
+			if(bottomSide) {
+				obj.y = innerHeight - obj.radius - 0;
 			}
-			else if(obj.y - obj.radius < 0) {
-				obj.isDead = true;
-				// obj.y = obj.y;
+			else if(topSide) {
+				obj.y = obj.y;
 			}
 		}
 	}
@@ -166,7 +179,7 @@ class Renderer {
 
 function main() {
 	const msWaitBeforeDrag = 400;
-	
+
 	const clickerEl = document.querySelector("img.cookie") as HTMLImageElement;
 	const bitContainerEl = document.querySelector(".cookie-bits") as HTMLElement;
 
