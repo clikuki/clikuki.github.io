@@ -25,16 +25,17 @@ class Physics {
 		const minRadius = 10;
 		const maxRadius = 30;
 		const radius = Math.random() * (maxRadius - minRadius) + minRadius;
+		// const radius = 20;
 		const mass = Math.PI * radius * radius;
 		// const mass = 1;
 
 		const initVelLength = Math.random() + .1;
 		const initVelAngle = Math.random() * -Math.PI;
 		const initVelocity = {
-			// x: initVelLength * Math.cos(initVelAngle),
-			// y: initVelLength * Math.sin(initVelAngle),
-			x: 0,
-			y: 0,
+			x: initVelLength * Math.cos(initVelAngle),
+			y: initVelLength * Math.sin(initVelAngle),
+			// x: 0,
+			// y: 0,
 		}
 
 		const obj = new PhysicsObject(
@@ -82,16 +83,9 @@ class Physics {
 			const bottomSide = obj.y + obj.radius > innerHeight;
 			const topSide = obj.y - obj.radius < 0;
 
-			if(leftSide || rightSide) {
-				const currXVel = obj.x - obj.prevX;
-				this.applyForce(obj, { x: -currXVel*2, y: 0});
-				// obj.prevX = obj.x + currXVel;
-			}
-			else if (topSide || bottomSide) {
-				const currYVel = obj.y - obj.prevY;
-				this.applyForce(obj, { x: 0, y: -currYVel*2});
-				// obj.prevY = obj.y + currYVel;
-			}
+			// Get velocity first BEFORE moving to non-colliding position
+			const velX = obj.x - obj.prevX;
+			const velY = obj.y - obj.prevY;
 
 			if(rightSide) {
 				obj.x = innerWidth - obj.radius;
@@ -101,10 +95,17 @@ class Physics {
 			}
 			
 			if(bottomSide) {
-				obj.y = innerHeight - obj.radius - 0;
+				obj.y = innerHeight - obj.radius;
 			}
 			else if(topSide) {
 				obj.y = obj.y;
+			}
+
+			if(leftSide || rightSide) {
+				obj.prevX = obj.x + velX;
+			}
+			else if (topSide || bottomSide) {
+				obj.prevY = obj.y + velY;
 			}
 		}
 	}
@@ -142,6 +143,15 @@ class Physics {
 		const alpha = this.accumulator / this.dt;
 		return alpha;
 	}
+
+	/** FOR DEBUG ONLY; FOR STEPPING THRU PHYSICS ONE BY ONE */
+	public debug_update(iterCnt: number) {
+		this.removeDead();
+		for(let i = 0; i < iterCnt; ++i) {
+			this.gravity();
+			this.checkBounds();
+		}
+	}
 }
 
 class Renderer {
@@ -163,13 +173,15 @@ class Renderer {
 	public update(alpha: number) {
 		const oneMinusAlpha = 1 - alpha;
 		for(const obj of this.physObjects) {
-			const elem = this.elements.get(obj) ?? this.add(obj);
-
+			let elem = this.elements.get(obj);
 			if(obj.isDead) {
-				elem.remove();
-				this.elements.delete(obj);
+				if(elem) {
+					elem.remove();
+					this.elements.delete(obj);
+				}
 			}
 			else {
+				elem ??= this.add(obj);
 				elem.style.left = `${obj.x * alpha + obj.prevX * oneMinusAlpha - obj.radius}px`;
 				elem.style.top = `${obj.y * alpha + obj.prevY * oneMinusAlpha - obj.radius}px`;
 			}
@@ -208,6 +220,7 @@ function main() {
 		requestAnimationFrame(function updateLoop(t) {
 			const alpha = physics.update(t);
 			renderer.update(alpha);
+			// renderer.update(0);
 			requestAnimationFrame(updateLoop);
 		})
 	}
