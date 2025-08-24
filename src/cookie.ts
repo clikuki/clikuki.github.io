@@ -2,13 +2,20 @@ interface Vector {
 	x: number,
 	y: number,
 };
+class Vector {
+	private constructor() {}
+	static copy(one: Vector) { return { x: one.x, y: one.y } }
+	static add(one: Vector, two: Vector) { return { x: one.x + two.x, y: one.y + two.y } }
+	static sub(one: Vector, two: Vector) { return { x: one.x - two.x, y: one.y - two.y } }
+	static mult(one: Vector, scalar: number) { return { x: one.x * scalar, y: one.y * scalar } }
+	static div(one: Vector, scalar: number) { return { x: one.x / scalar, y: one.y / scalar } }
+}
+
 class PhysicsObject {
 	public isDead = false;
 	constructor(
-		public x: number,
-		public y: number,
-		public prevX: number,
-		public prevY: number,
+		public pos: Vector,
+		public prevPos: Vector,
 		public radius: number,
 		public mass: number,
 	) {}
@@ -38,11 +45,10 @@ class Physics {
 			// y: 0,
 		}
 
+		const position = { x, y };
 		const obj = new PhysicsObject(
-			x,
-			y,
-			x-initVelocity.x,
-			y-initVelocity.y,
+			position,
+			Vector.add(position, initVelocity),
 			radius,
 			mass,
 		);
@@ -52,20 +58,12 @@ class Physics {
 		return obj;
 	}
 	public applyForce(obj: PhysicsObject, force: Vector): void {
-    const accel = {
-			x: force.x / obj.mass,
-			y: force.y / obj.mass,
-		};
-    const prevPos = {
-			x: obj.x,
-			y: obj.y,
-		};
+    const accel = Vector.div(force, obj.mass);
+    const prevPos = Vector.copy(obj.pos);
 
-    obj.x = 2 * obj.x - obj.prevX + accel.x * this.dtSqr;
-    obj.y = 2 * obj.y - obj.prevY + accel.y * this.dtSqr;
-    
-    obj.prevX = prevPos.x;
-    obj.prevY = prevPos.y;
+		// p_t = 2 * p_{t-1} - p_{t-2} + a_t * dt^2
+		obj.pos = Vector.add(Vector.sub(Vector.mult(obj.pos, 2), obj.prevPos), Vector.mult(accel, this.dtSqr));
+    obj.prevPos = prevPos;
 	}
 	private gravity(): void {
 		const gravity = { x: 0, y: 10 };
@@ -78,34 +76,34 @@ class Physics {
 	}
 	private checkBounds(): void {
 		for(const obj of this.objects) {
-			const rightSide = obj.x + obj.radius > innerWidth;
-			const leftSide = obj.x - obj.radius < 0;
-			const bottomSide = obj.y + obj.radius > innerHeight;
-			const topSide = obj.y - obj.radius < 0;
+			const rightSide = obj.pos.x + obj.radius > innerWidth;
+			const leftSide = obj.pos.x - obj.radius < 0;
+			const bottomSide = obj.pos.y + obj.radius > innerHeight;
+			const topSide = obj.pos.y - obj.radius < 0;
 
 			// Get velocity first BEFORE moving to non-colliding position
-			const velX = obj.x - obj.prevX;
-			const velY = obj.y - obj.prevY;
+			const velX = obj.pos.x - obj.prevPos.x;
+			const velY = obj.pos.y - obj.prevPos.y;
 
 			if(rightSide) {
-				obj.x = innerWidth - obj.radius;
+				obj.pos.x = innerWidth - obj.radius;
 			}
 			else if(leftSide) {
-				obj.x = obj.x;
+				obj.pos.x = obj.pos.x;
 			}
 			
 			if(bottomSide) {
-				obj.y = innerHeight - obj.radius;
+				obj.pos.y = innerHeight - obj.radius;
 			}
 			else if(topSide) {
-				obj.y = obj.y;
+				obj.pos.y = obj.pos.y;
 			}
 
 			if(leftSide || rightSide) {
-				obj.prevX = obj.x + velX;
+				obj.prevPos.x = obj.pos.x + velX;
 			}
 			else if (topSide || bottomSide) {
-				obj.prevY = obj.y + velY;
+				obj.prevPos.y = obj.pos.y + velY;
 			}
 		}
 	}
@@ -162,8 +160,8 @@ class Renderer {
 	public add(obj: PhysicsObject): HTMLImageElement {
 		const elem = document.createElement("img");
 		elem.src = Renderer.imgSrc;
-		elem.style.left = `${obj.x - obj.radius}px`;
-		elem.style.top = `${obj.y - obj.radius}px`;
+		elem.style.left = `${obj.pos.x - obj.radius}px`;
+		elem.style.top = `${obj.pos.y - obj.radius}px`;
 		elem.style.width = `${obj.radius + obj.radius}px`;
 
 		this.containerEl.appendChild(elem);
@@ -182,8 +180,8 @@ class Renderer {
 			}
 			else {
 				elem ??= this.add(obj);
-				elem.style.left = `${obj.x * alpha + obj.prevX * oneMinusAlpha - obj.radius}px`;
-				elem.style.top = `${obj.y * alpha + obj.prevY * oneMinusAlpha - obj.radius}px`;
+				elem.style.left = `${obj.pos.x * alpha + obj.prevPos.x * oneMinusAlpha - obj.radius}px`;
+				elem.style.top = `${obj.pos.y * alpha + obj.prevPos.y * oneMinusAlpha - obj.radius}px`;
 			}
 		}
 	}
