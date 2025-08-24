@@ -16,6 +16,7 @@ class PhysicsObject {
 	constructor(
 		public pos: Vector,
 		public prevPos: Vector,
+		public netForces: Vector,
 		public radius: number,
 		public mass: number,
 	) {}
@@ -49,6 +50,7 @@ class Physics {
 		const obj = new PhysicsObject(
 			position,
 			Vector.add(position, initVelocity),
+			{ x: 0, y: 0 },
 			radius,
 			mass,
 		);
@@ -58,12 +60,17 @@ class Physics {
 		return obj;
 	}
 	public applyForce(obj: PhysicsObject, force: Vector): void {
-    const accel = Vector.div(force, obj.mass);
-    const prevPos = Vector.copy(obj.pos);
+    obj.netForces = Vector.add(obj.netForces, Vector.div(force, obj.mass));
+	}
+	private updatePositions() {
+		for(const obj of this.objects) {
+			const prevPos = Vector.copy(obj.pos);
 
-		// p_t = 2 * p_{t-1} - p_{t-2} + a_t * dt^2
-		obj.pos = Vector.add(Vector.sub(Vector.mult(obj.pos, 2), obj.prevPos), Vector.mult(accel, this.dtSqr));
-    obj.prevPos = prevPos;
+			// p_t = 2 * p_{t-1} - p_{t-2} + a_t * dt^2
+			obj.pos = Vector.add(Vector.sub(Vector.mult(obj.pos, 2), obj.prevPos), Vector.mult(obj.netForces, this.dtSqr));
+			obj.prevPos = prevPos;
+			obj.netForces = { x: 0, y: 0 };
+		}
 	}
 	private gravity(): void {
 		const gravity = { x: 0, y: 10 };
@@ -133,6 +140,7 @@ class Physics {
 		this.removeDead();
 		while(this.accumulator >= this.dt) {
 			this.gravity();
+			this.updatePositions();
 			this.checkBounds();
 
 			this.accumulator -= this.dt;
@@ -147,6 +155,7 @@ class Physics {
 		this.removeDead();
 		for(let i = 0; i < iterCnt; ++i) {
 			this.gravity();
+			this.updatePositions();
 			this.checkBounds();
 		}
 	}
