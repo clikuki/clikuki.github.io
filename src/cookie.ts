@@ -66,68 +66,68 @@ class Physics {
 	public applyForce(obj: PhysicsObject, force: Vector): void {
     obj.netForces = Vector.add(obj.netForces, Vector.div(force, obj.mass));
 	}
-	private updatePositions() {
-		for(const obj of this.objects) {
-			const prevPos = Vector.copy(obj.pos);
+	private updatePosition(obj: PhysicsObject) {
+		const prevPos = Vector.copy(obj.pos);
 
-			// p_t = 2 * p_{t-1} - p_{t-2} + a_t * dt^2
-			obj.pos = Vector.add(Vector.sub(Vector.mult(obj.pos, 2), obj.prevPos), Vector.mult(obj.netForces, this.dtSqr));
-			obj.prevPos = prevPos;
-			obj.netForces = { x: 0, y: 0 };
+		// p_t = 2 * p_{t-1} - p_{t-2} + a_t * dt^2
+		obj.pos = Vector.add(Vector.sub(Vector.mult(obj.pos, 2), obj.prevPos), Vector.mult(obj.netForces, this.dtSqr));
+		obj.prevPos = prevPos;
+		obj.netForces = { x: 0, y: 0 };
+	}
+	private applyGravity(obj: PhysicsObject): void {
+		const force = Vector.mult(this.gravity, obj.mass);
+		this.applyForce(obj, force);
+	}
+	private applyDrag(obj: PhysicsObject) {
+		const vel = Vector.sub(obj.pos, obj.prevPos);
+		if(Math.abs(vel.x) < .01 && Math.abs(vel.y) < .01) return;
+
+		const speed = Math.hypot(vel.x, vel.y);
+		const dir = Vector.div(vel, speed);
+		const surface = obj.radius * 2;
+
+		// force = dir * -1 * speed^2 * surface * dragCoeffiencnt
+		const scalarPart = -speed * speed * surface * this.dragCoefficient;
+		const force = Vector.mult(dir, scalarPart);
+		this.applyForce(obj, force);
+		
+	}
+	private checkBounds(obj: PhysicsObject): void {
+		// Get velocity first BEFORE moving to non-colliding position
+		const velocity = Vector.sub(obj.pos, obj.prevPos);
+
+		const rightSide = obj.pos.x + obj.radius > innerWidth;
+		const leftSide = obj.pos.x - obj.radius < 0;
+		const bottomSide = obj.pos.y + obj.radius > innerHeight;
+		const topSide = obj.pos.y - obj.radius < 0;
+
+		if(rightSide) {
+			obj.pos.x = innerWidth - obj.radius;
+		}
+		else if(leftSide) {
+			obj.pos.x = obj.radius;
+		}
+		
+		if(bottomSide) {
+			obj.pos.y = innerHeight - obj.radius;
+		}
+		else if(topSide) {
+			obj.pos.y = obj.radius;
+		}
+
+		if(leftSide || rightSide) {
+			obj.prevPos.x = obj.pos.x + velocity.x * this.restitutionCoeffiecient;
+		}
+		else if (topSide || bottomSide) {
+			obj.prevPos.y = obj.pos.y + velocity.y * this.restitutionCoeffiecient;
 		}
 	}
-	private applyGravity(): void {
+	private updateObjects() {
 		for(const obj of this.objects) {
-			const force = Vector.mult(this.gravity, obj.mass);
-			this.applyForce(obj, force);
-		}
-	}
-	private applyDrag() {
-		for(const obj of this.objects) {
-			const vel = Vector.sub(obj.pos, obj.prevPos);
-			if(Math.abs(vel.x) < .01 && Math.abs(vel.y) < .01) continue;
-
-			const speed = Math.hypot(vel.x, vel.y);
-			const dir = Vector.div(vel, speed);
-			const surface = obj.radius * 2;
-
-			// force = dir * -1 * speed^2 * surface * dragCoeffiencnt
-			const scalarPart = -speed * speed * surface * this.dragCoefficient;
-			const force = Vector.mult(dir, scalarPart);
-			this.applyForce(obj, force);
-		}
-	}
-	private checkBounds(): void {
-		for(const obj of this.objects) {
-			const rightSide = obj.pos.x + obj.radius > innerWidth;
-			const leftSide = obj.pos.x - obj.radius < 0;
-			const bottomSide = obj.pos.y + obj.radius > innerHeight;
-			const topSide = obj.pos.y - obj.radius < 0;
-
-			// Get velocity first BEFORE moving to non-colliding position
-			const velX = obj.pos.x - obj.prevPos.x;
-			const velY = obj.pos.y - obj.prevPos.y;
-
-			if(rightSide) {
-				obj.pos.x = innerWidth - obj.radius;
-			}
-			else if(leftSide) {
-				obj.pos.x = obj.pos.x;
-			}
-			
-			if(bottomSide) {
-				obj.pos.y = innerHeight - obj.radius;
-			}
-			else if(topSide) {
-				obj.pos.y = obj.pos.y;
-			}
-
-			if(leftSide || rightSide) {
-				obj.prevPos.x = obj.pos.x + velX * this.restitutionCoeffiecient;
-			}
-			else if (topSide || bottomSide) {
-				obj.prevPos.y = obj.pos.y + velY * this.restitutionCoeffiecient;
-			}
+			this.applyGravity(obj);
+			this.applyDrag(obj);
+			this.updatePosition(obj);
+			this.checkBounds(obj);
 		}
 	}
 	private removeDead(): void {
@@ -155,11 +155,7 @@ class Physics {
 
 		this.removeDead();
 		while(this.accumulator >= this.dt) {
-			this.applyGravity();
-			this.applyDrag();
-			this.updatePositions();
-			this.checkBounds();
-
+			this.updateObjects();
 			this.accumulator -= this.dt;
 		}
 
@@ -171,10 +167,7 @@ class Physics {
 	public debug_update(iterCnt: number) {
 		this.removeDead();
 		for(let i = 0; i < iterCnt; ++i) {
-			this.applyGravity();
-			this.applyDrag();
-			this.updatePositions();
-			this.checkBounds();
+			this.updateObjects();
 		}
 	}
 }
