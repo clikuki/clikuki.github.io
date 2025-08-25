@@ -28,6 +28,10 @@ class Physics {
 	private dtSqr = this.dt * this.dt;
 	private currentTime = performance.now();
 	private accumulator = 0;
+	
+	private gravity = { x: 0, y: 10 };
+	private dragCoefficient = 10;
+	private restitutionCoeffiecient = .8;
 
 	public spawn(x: number, y: number): PhysicsObject {
 		const minRadius = 10;
@@ -72,15 +76,13 @@ class Physics {
 			obj.netForces = { x: 0, y: 0 };
 		}
 	}
-	private gravity(): void {
-		const gravity = { x: 0, y: 10 };
+	private applyGravity(): void {
 		for(const obj of this.objects) {
-			const force = Vector.mult(gravity, obj.mass);
+			const force = Vector.mult(this.gravity, obj.mass);
 			this.applyForce(obj, force);
 		}
 	}
-	private drag() {
-		const dragCoefficient = 10;
+	private applyDrag() {
 		for(const obj of this.objects) {
 			const vel = Vector.sub(obj.pos, obj.prevPos);
 			if(Math.abs(vel.x) < .01 && Math.abs(vel.y) < .01) continue;
@@ -90,7 +92,7 @@ class Physics {
 			const surface = obj.radius * 2;
 
 			// force = dir * -1 * speed^2 * surface * dragCoeffiencnt
-			const scalarPart = -speed * speed * surface * dragCoefficient;
+			const scalarPart = -speed * speed * surface * this.dragCoefficient;
 			const force = Vector.mult(dir, scalarPart);
 			this.applyForce(obj, force);
 		}
@@ -121,10 +123,10 @@ class Physics {
 			}
 
 			if(leftSide || rightSide) {
-				obj.prevPos.x = obj.pos.x + velX;
+				obj.prevPos.x = obj.pos.x + velX * this.restitutionCoeffiecient;
 			}
 			else if (topSide || bottomSide) {
-				obj.prevPos.y = obj.pos.y + velY;
+				obj.prevPos.y = obj.pos.y + velY * this.restitutionCoeffiecient;
 			}
 		}
 	}
@@ -153,8 +155,8 @@ class Physics {
 
 		this.removeDead();
 		while(this.accumulator >= this.dt) {
-			this.gravity();
-			this.drag();
+			this.applyGravity();
+			this.applyDrag();
 			this.updatePositions();
 			this.checkBounds();
 
@@ -169,8 +171,8 @@ class Physics {
 	public debug_update(iterCnt: number) {
 		this.removeDead();
 		for(let i = 0; i < iterCnt; ++i) {
-			this.gravity();
-			this.drag();
+			this.applyGravity();
+			this.applyDrag();
 			this.updatePositions();
 			this.checkBounds();
 		}
