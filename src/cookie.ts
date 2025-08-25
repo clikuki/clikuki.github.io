@@ -17,6 +17,8 @@ class PhysicsObject {
 		public pos: Vector,
 		public prevPos: Vector,
 		public netForces: Vector,
+		public rot: number, // in radians
+		public angularVel: number, // in radians
 		public radius: number,
 		public mass: number,
 	) {}
@@ -50,11 +52,16 @@ class Physics {
 			// y: 0,
 		}
 
+		const rotation = Math.random() * 2 * Math.PI - Math.PI;
+		const angularVelocity = Math.random() * 2 * Math.PI - Math.PI;
+
 		const position = { x, y };
 		const obj = new PhysicsObject(
 			position,
 			Vector.add(position, initVelocity),
 			{ x: 0, y: 0 },
+			rotation,
+			angularVelocity,
 			radius,
 			mass,
 		);
@@ -66,13 +73,15 @@ class Physics {
 	public applyForce(obj: PhysicsObject, force: Vector): void {
     obj.netForces = Vector.add(obj.netForces, Vector.div(force, obj.mass));
 	}
-	private updatePosition(obj: PhysicsObject) {
+	private updateObject(obj: PhysicsObject) {
 		const prevPos = Vector.copy(obj.pos);
 
 		// p_t = 2 * p_{t-1} - p_{t-2} + a_t * dt^2
 		obj.pos = Vector.add(Vector.sub(Vector.mult(obj.pos, 2), obj.prevPos), Vector.mult(obj.netForces, this.dtSqr));
 		obj.prevPos = prevPos;
 		obj.netForces = { x: 0, y: 0 };
+
+		obj.rot += obj.angularVel;
 	}
 	private applyGravity(obj: PhysicsObject): void {
 		const force = Vector.mult(this.gravity, obj.mass);
@@ -126,7 +135,7 @@ class Physics {
 		for(const obj of this.objects) {
 			this.applyGravity(obj);
 			this.applyDrag(obj);
-			this.updatePosition(obj);
+			this.updateObject(obj);
 			this.checkBounds(obj);
 		}
 	}
@@ -202,6 +211,7 @@ class Renderer {
 				elem ??= this.add(obj);
 				elem.style.left = `${obj.pos.x * alpha + obj.prevPos.x * oneMinusAlpha - obj.radius}px`;
 				elem.style.top = `${obj.pos.y * alpha + obj.prevPos.y * oneMinusAlpha - obj.radius}px`;
+				elem.style.rotate = `${(obj.rot + obj.angularVel) * alpha + obj.rot * oneMinusAlpha}rad`;
 			}
 		}
 	}
