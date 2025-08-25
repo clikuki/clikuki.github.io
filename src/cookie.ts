@@ -75,10 +75,24 @@ class Physics {
 	private gravity(): void {
 		const gravity = { x: 0, y: 10 };
 		for(const obj of this.objects) {
-			this.applyForce(obj, {
-				x: gravity.x * obj.mass,
-				y: gravity.y * obj.mass,
-			});
+			const force = Vector.mult(gravity, obj.mass);
+			this.applyForce(obj, force);
+		}
+	}
+	private drag() {
+		const dragCoefficient = 10;
+		for(const obj of this.objects) {
+			const vel = Vector.sub(obj.pos, obj.prevPos);
+			if(Math.abs(vel.x) < .01 && Math.abs(vel.y) < .01) continue;
+
+			const speed = Math.hypot(vel.x, vel.y);
+			const dir = Vector.div(vel, speed);
+			const surface = obj.radius * 2;
+
+			// force = dir * -1 * speed^2 * surface * dragCoeffiencnt
+			const scalarPart = -speed * speed * surface * dragCoefficient;
+			const force = Vector.mult(dir, scalarPart);
+			this.applyForce(obj, force);
 		}
 	}
 	private checkBounds(): void {
@@ -140,6 +154,7 @@ class Physics {
 		this.removeDead();
 		while(this.accumulator >= this.dt) {
 			this.gravity();
+			this.drag();
 			this.updatePositions();
 			this.checkBounds();
 
@@ -155,6 +170,7 @@ class Physics {
 		this.removeDead();
 		for(let i = 0; i < iterCnt; ++i) {
 			this.gravity();
+			this.drag();
 			this.updatePositions();
 			this.checkBounds();
 		}
