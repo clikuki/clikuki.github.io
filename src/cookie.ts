@@ -7,6 +7,8 @@ class Vector {
 	static copy(one: Vector) { return { x: one.x, y: one.y } }
 	static add(one: Vector, two: Vector) { return { x: one.x + two.x, y: one.y + two.y } }
 	static sub(one: Vector, two: Vector) { return { x: one.x - two.x, y: one.y - two.y } }
+	static addScalar(one: Vector, scalar: number) { return { x: one.x + scalar, y: one.y + scalar } }
+	static subScalar(one: Vector, scalar: number) { return { x: one.x - scalar, y: one.y - scalar } }
 	static mult(one: Vector, scalar: number) { return { x: one.x * scalar, y: one.y * scalar } }
 	static div(one: Vector, scalar: number) { return { x: one.x / scalar, y: one.y / scalar } }
 }
@@ -33,7 +35,8 @@ class Physics {
 	
 	private gravity = { x: 0, y: 10 };
 	private dragCoefficient = 10;
-	private restitutionCoeffiecient = .8;
+	private restitutionCoefficient = .7;
+	// private frictionCoefficient = .8;
 
 	public spawn(x: number, y: number): PhysicsObject {
 		const minRadius = 10;
@@ -52,8 +55,11 @@ class Physics {
 			// y: 0,
 		}
 
-		const rotation = Math.random() * 2 * Math.PI - Math.PI;
-		const angularVelocity = Math.random() * 2 * Math.PI - Math.PI;
+		// const rotation = Math.random() * 2 * Math.PI - Math.PI;
+		const rotation = 0;
+		const maxAngularVelocity = .05;
+		const angularVelocity = Math.random() * maxAngularVelocity * 2 - maxAngularVelocity;
+		// const angularVelocity = 0;
 
 		const position = { x, y };
 		const obj = new PhysicsObject(
@@ -124,12 +130,74 @@ class Physics {
 			obj.pos.y = obj.radius;
 		}
 
+		// if(leftSide || rightSide) {
+		// 	obj.prevPos.x = obj.pos.x + velocity.x * this.restitutionCoefficient;
+		// }
+		// else if (topSide || bottomSide) {
+		// 	obj.prevPos.y = obj.pos.y + velocity.y * this.restitutionCoefficient;
+
+		// 	const contactVel = velocity.x + obj.radius * obj.angularVel;
+
+		// 	// velocity at contact + linear velocity = 0
+		// }
+
+
 		if(leftSide || rightSide) {
-			obj.prevPos.x = obj.pos.x + velocity.x * this.restitutionCoeffiecient;
+			const velY = this.linearVelAfterCollision(velocity.y, obj);
+			const angularVel = this.angularVelAfterCollision(velocity.y, obj);
+
+			obj.prevPos.x = obj.pos.x + velocity.x * this.restitutionCoefficient;
+			obj.prevPos.y = obj.pos.y + velY;
+			obj.angularVel = angularVel;
 		}
 		else if (topSide || bottomSide) {
-			obj.prevPos.y = obj.pos.y + velocity.y * this.restitutionCoeffiecient;
+			const velX = this.linearVelAfterCollision(velocity.x, obj);
+			const angularVel = this.angularVelAfterCollision(velocity.x, obj);
+
+			obj.prevPos.y = obj.pos.y + velocity.y * this.restitutionCoefficient;
+			obj.prevPos.x = obj.pos.x + velX;
+			obj.angularVel = angularVel;
 		}
+
+		
+		// if(leftSide || rightSide) {
+		// 	const halfCircumference = Math.PI * obj.radius;
+		// 	const decayedVelocity = velocity.y * this.frictionCoefficient;
+		// 	const speedByHalfBodyLength = decayedVelocity / halfCircumference;
+
+		// 	obj.prevPos.x = obj.pos.x + velocity.x * this.restitutionCoefficient;
+		// 	obj.prevPos.y = obj.pos.y + decayedVelocity;
+		// 	obj.angularVel = speedByHalfBodyLength * Math.PI;
+		// }
+		// else if (topSide || bottomSide) {
+		// 	const halfCircumference = Math.PI * obj.radius;
+		// 	const decayedVelocity = velocity.x * this.frictionCoefficient;
+		// 	const speedByHalfBodyLength = decayedVelocity / halfCircumference;
+
+		// 	obj.prevPos.y = obj.pos.y + velocity.y * this.restitutionCoefficient;
+		// 	obj.prevPos.x = obj.pos.x - decayedVelocity;
+		// 	obj.angularVel = speedByHalfBodyLength * Math.PI;
+		// }
+	}
+	// private velocitiesAfterCollision(obj: PhysicsObject) {
+	// 	const velocity = Vector.sub(obj.pos, obj.prevPos);
+	// 	// const impulse = ;
+
+	// 	return {
+	// 		linear: {
+				
+	// 		},
+	// 		angular: {
+
+	// 		}
+	// 	}
+	// }
+	private angularVelAfterCollision(component: number, obj: PhysicsObject) {
+		return obj.angularVel - 2 / 3 / obj.radius * (component + obj.angularVel * obj.radius);
+		// return obj.angularVel - (2 * (component + obj.angularVel * obj.radius)) / (3 * obj.radius);
+	}
+	private linearVelAfterCollision(component: number, obj: PhysicsObject) {
+		return 2 * component / 3 - obj.angularVel * obj.radius / 3;
 	}
 	private updateObjects() {
 		for(const obj of this.objects) {
@@ -246,9 +314,9 @@ function main() {
 
 	try {
 		requestAnimationFrame(function updateLoop(t) {
-			const alpha = physics.update(t);
-			renderer.update(alpha);
-			// renderer.update(0);
+			// const alpha = physics.update(t);
+			// renderer.update(alpha);
+			renderer.update(t*0);
 			requestAnimationFrame(updateLoop);
 		})
 	}
