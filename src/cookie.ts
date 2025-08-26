@@ -39,27 +39,27 @@ class Physics {
 	// private frictionCoefficient = .8;
 
 	public spawn(x: number, y: number): PhysicsObject {
-		const minRadius = 10;
-		const maxRadius = 30;
-		const radius = Math.random() * (maxRadius - minRadius) + minRadius;
-		// const radius = 20;
+		// const minRadius = 10;
+		// const maxRadius = 30;
+		// const radius = Math.random() * (maxRadius - minRadius) + minRadius;
+		const radius = 30;
 		const mass = Math.PI * radius * radius;
 		// const mass = 1;
 
-		const initVelLength = Math.random() + .1;
-		const initVelAngle = Math.random() * -Math.PI;
+		// const initVelLength = Math.random() + .1;
+		// const initVelAngle = Math.random() * -Math.PI;
 		const initVelocity = {
-			x: initVelLength * Math.cos(initVelAngle),
-			y: initVelLength * Math.sin(initVelAngle),
-			// x: 0,
-			// y: 0,
+			// x: initVelLength * Math.cos(initVelAngle),
+			// y: initVelLength * Math.sin(initVelAngle),
+			x: 0,
+			y: 0,
 		}
 
 		// const rotation = Math.random() * 2 * Math.PI - Math.PI;
 		const rotation = 0;
-		const maxAngularVelocity = .05;
-		const angularVelocity = Math.random() * maxAngularVelocity * 2 - maxAngularVelocity;
-		// const angularVelocity = 0;
+		// const maxAngularVelocity = .05;
+		// const angularVelocity = Math.random() * maxAngularVelocity * 2 - maxAngularVelocity;
+		const angularVelocity = 0.5;
 
 		const position = { x, y };
 		const obj = new PhysicsObject(
@@ -107,7 +107,8 @@ class Physics {
 		this.applyForce(obj, force);
 		
 	}
-	private checkBounds(obj: PhysicsObject): void {
+
+	private constrainToView(obj: PhysicsObject): void {
 		// Get velocity first BEFORE moving to non-colliding position
 		const velocity = Vector.sub(obj.pos, obj.prevPos);
 
@@ -143,6 +144,8 @@ class Physics {
 
 
 		if(leftSide || rightSide) {
+			obj.isDead = true;
+
 			const velY = this.linearVelAfterCollision(velocity.y, obj);
 			const angularVel = this.angularVelAfterCollision(velocity.y, obj);
 
@@ -151,12 +154,16 @@ class Physics {
 			obj.angularVel = angularVel;
 		}
 		else if (topSide || bottomSide) {
+			console.log("collided! before", velocity.x, obj.angularVel);
+
 			const velX = this.linearVelAfterCollision(velocity.x, obj);
 			const angularVel = this.angularVelAfterCollision(velocity.x, obj);
-
+			
 			obj.prevPos.y = obj.pos.y + velocity.y * this.restitutionCoefficient;
 			obj.prevPos.x = obj.pos.x + velX;
 			obj.angularVel = angularVel;
+
+			console.log("collided! after", velX, angularVel * obj.radius, velX + angularVel * obj.radius);
 		}
 
 		
@@ -179,19 +186,24 @@ class Physics {
 		// 	obj.angularVel = speedByHalfBodyLength * Math.PI;
 		// }
 	}
-	// private velocitiesAfterCollision(obj: PhysicsObject) {
-	// 	const velocity = Vector.sub(obj.pos, obj.prevPos);
-	// 	// const impulse = ;
+	private velocitiesAfterCollision(obj: PhysicsObject) {
+		const velocity = Vector.sub(obj.pos, obj.prevPos);
+		const impulse = {
+			x: -obj.mass / 3 * (velocity.x + obj.angularVel * obj.radius),
+			y: -obj.mass / 3 * (velocity.y + obj.angularVel * obj.radius),
+		}
 
-	// 	return {
-	// 		linear: {
-				
-	// 		},
-	// 		angular: {
-
-	// 		}
-	// 	}
-	// }
+		return {
+			linear: {
+				x: velocity.x + impulse.x / obj.mass,
+				y: velocity.y + impulse.y / obj.mass,
+			},
+			angular: {
+				x: obj.angularVel + 2 * impulse.x / obj.mass / obj.radius,
+				y: obj.angularVel + 2 * impulse.y / obj.mass / obj.radius,
+			}
+		}
+	}
 	private angularVelAfterCollision(component: number, obj: PhysicsObject) {
 		return obj.angularVel - 2 / 3 / obj.radius * (component + obj.angularVel * obj.radius);
 		// return obj.angularVel - (2 * (component + obj.angularVel * obj.radius)) / (3 * obj.radius);
@@ -199,14 +211,16 @@ class Physics {
 	private linearVelAfterCollision(component: number, obj: PhysicsObject) {
 		return 2 * component / 3 - obj.angularVel * obj.radius / 3;
 	}
+
 	private updateObjects() {
 		for(const obj of this.objects) {
 			this.applyGravity(obj);
 			this.applyDrag(obj);
 			this.updateObject(obj);
-			this.checkBounds(obj);
+			this.constrainToView(obj);
 		}
 	}
+
 	private removeDead(): void {
 		let i = 0;
 		let cnt = this.objects.length;
@@ -223,6 +237,7 @@ class Physics {
 			}
 		}
 	}
+	
 	public update(newTime: number): number {
 		let frameTime = newTime - this.currentTime;
 		if(frameTime > .25) frameTime = .25; // Why?
@@ -241,7 +256,7 @@ class Physics {
 	}
 
 	/** FOR DEBUG ONLY; FOR STEPPING THRU PHYSICS ONE BY ONE */
-	public debug_update(iterCnt: number) {
+	public debug_update(iterCnt = 1) {
 		this.removeDead();
 		for(let i = 0; i < iterCnt; ++i) {
 			this.updateObjects();
@@ -279,7 +294,7 @@ class Renderer {
 				elem ??= this.add(obj);
 				elem.style.left = `${obj.pos.x * alpha + obj.prevPos.x * oneMinusAlpha - obj.radius}px`;
 				elem.style.top = `${obj.pos.y * alpha + obj.prevPos.y * oneMinusAlpha - obj.radius}px`;
-				elem.style.rotate = `${(obj.rot + obj.angularVel) * alpha + obj.rot * oneMinusAlpha}rad`;
+				elem.style.rotate = `${Math.PI / 2 - obj.rot}rad`;
 			}
 		}
 	}
@@ -314,9 +329,9 @@ function main() {
 
 	try {
 		requestAnimationFrame(function updateLoop(t) {
-			// const alpha = physics.update(t);
-			// renderer.update(alpha);
-			renderer.update(t*0);
+			const alpha = physics.update(t);
+			renderer.update(alpha);
+			// renderer.update(t*0);
 			requestAnimationFrame(updateLoop);
 		})
 	}
