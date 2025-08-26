@@ -1,8 +1,8 @@
-interface Vector {
+export interface Vector {
 	x: number,
 	y: number,
 };
-class Vector {
+export class Vector {
 	private constructor() {}
 	static copy(one: Vector) { return { x: one.x, y: one.y } }
 	static add(one: Vector, two: Vector) { return { x: one.x + two.x, y: one.y + two.y } }
@@ -13,7 +13,7 @@ class Vector {
 	static div(one: Vector, scalar: number) { return { x: one.x / scalar, y: one.y / scalar } }
 }
 
-class PhysicsObject {
+export class PhysicsObject {
 	public isDead = false;
 	constructor(
 		public pos: Vector,
@@ -26,7 +26,7 @@ class PhysicsObject {
 	) {}
 }
 
-class Physics {
+export class Physics {
 	public objects: PhysicsObject[] = []
 	private dt = 0.01;
 	private dtSqr = this.dt * this.dt;
@@ -109,8 +109,8 @@ class Physics {
 	}
 
 	private constrainToView(obj: PhysicsObject): void {
-		// Get velocity first BEFORE moving to non-colliding position
 		const velocity = Vector.sub(obj.pos, obj.prevPos);
+		const newVelocities = this.velocitiesAfterCollision(obj);
 
 		const rightSide = obj.pos.x + obj.radius > innerWidth;
 		const leftSide = obj.pos.x - obj.radius < 0;
@@ -146,24 +146,18 @@ class Physics {
 		if(leftSide || rightSide) {
 			obj.isDead = true;
 
-			const velY = this.linearVelAfterCollision(velocity.y, obj);
-			const angularVel = this.angularVelAfterCollision(velocity.y, obj);
-
 			obj.prevPos.x = obj.pos.x + velocity.x * this.restitutionCoefficient;
-			obj.prevPos.y = obj.pos.y + velY;
-			obj.angularVel = angularVel;
+			obj.prevPos.y = obj.pos.y + newVelocities.linear.y;
+			obj.angularVel = newVelocities.angular.y;
 		}
 		else if (topSide || bottomSide) {
-			console.log("collided! before", velocity.x, obj.angularVel);
-
-			const velX = this.linearVelAfterCollision(velocity.x, obj);
-			const angularVel = this.angularVelAfterCollision(velocity.x, obj);
+			// console.log("collided! before", velocity.x, obj.angularVel);
 			
 			obj.prevPos.y = obj.pos.y + velocity.y * this.restitutionCoefficient;
-			obj.prevPos.x = obj.pos.x + velX;
-			obj.angularVel = angularVel;
+			obj.prevPos.x = obj.pos.x + newVelocities.linear.x;
+			obj.angularVel = newVelocities.angular.x;
 
-			console.log("collided! after", velX, angularVel * obj.radius, velX + angularVel * obj.radius);
+			// console.log("collided! after", velX, angularVel * obj.radius, velX + angularVel * obj.radius);
 		}
 
 		
@@ -203,13 +197,6 @@ class Physics {
 				y: obj.angularVel + 2 * impulse.y / obj.mass / obj.radius,
 			}
 		}
-	}
-	private angularVelAfterCollision(component: number, obj: PhysicsObject) {
-		return obj.angularVel - 2 / 3 / obj.radius * (component + obj.angularVel * obj.radius);
-		// return obj.angularVel - (2 * (component + obj.angularVel * obj.radius)) / (3 * obj.radius);
-	}
-	private linearVelAfterCollision(component: number, obj: PhysicsObject) {
-		return 2 * component / 3 - obj.angularVel * obj.radius / 3;
 	}
 
 	private updateObjects() {
@@ -263,87 +250,3 @@ class Physics {
 		}
 	}
 }
-
-class Renderer {
-	private static imgSrc = "pixel_cookie.png";
-	private elements = new Map<PhysicsObject, HTMLImageElement>()
-	constructor(private physObjects: PhysicsObject[], private containerEl: HTMLElement) {}
-
-	public add(obj: PhysicsObject): HTMLImageElement {
-		const elem = document.createElement("img");
-		elem.src = Renderer.imgSrc;
-		elem.style.left = `${obj.pos.x - obj.radius}px`;
-		elem.style.top = `${obj.pos.y - obj.radius}px`;
-		elem.style.width = `${obj.radius + obj.radius}px`;
-
-		this.containerEl.appendChild(elem);
-		this.elements.set(obj, elem);
-		return elem;
-	}
-	public update(alpha: number) {
-		const oneMinusAlpha = 1 - alpha;
-		for(const obj of this.physObjects) {
-			let elem = this.elements.get(obj);
-			if(obj.isDead) {
-				if(elem) {
-					elem.remove();
-					this.elements.delete(obj);
-				}
-			}
-			else {
-				elem ??= this.add(obj);
-				elem.style.left = `${obj.pos.x * alpha + obj.prevPos.x * oneMinusAlpha - obj.radius}px`;
-				elem.style.top = `${obj.pos.y * alpha + obj.prevPos.y * oneMinusAlpha - obj.radius}px`;
-				elem.style.rotate = `${Math.PI / 2 - obj.rot}rad`;
-			}
-		}
-	}
-}
-
-function main() {
-	const msWaitBeforeDrag = 400;
-
-	const clickerEl = document.querySelector("img.cookie") as HTMLImageElement;
-	const bitContainerEl = document.querySelector(".cookie-bits") as HTMLElement;
-
-	clickerEl.classList.add("js-enabled")
-
-	const physics = new Physics();
-	const renderer = new Renderer(
-		physics.objects,
-		bitContainerEl,
-	);
-
-	clickerEl.addEventListener("click", (e) => {
-		const elem = renderer.add(physics.spawn(
-			e.x,
-			e.y + document.documentElement.scrollTop,
-		))
-		
-		elem.style.pointerEvents = "none";
-		setTimeout(
-			() => elem.style.pointerEvents = "",
-			msWaitBeforeDrag,
-		);
-	})
-
-	try {
-		requestAnimationFrame(function updateLoop(t) {
-			const alpha = physics.update(t);
-			renderer.update(alpha);
-			// renderer.update(t*0);
-			requestAnimationFrame(updateLoop);
-		})
-	}
-	catch(err) {
-		// Stop further errors, but still throw to console
-		throw err;
-	}
-
-	// @ts-expect-error
-	window.physics = physics;
-	// @ts-expect-error
-	window.renderer = renderer;
-}
-
-main();

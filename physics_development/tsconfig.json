@@ -1,11 +1,11 @@
 {
 	"include": [
-		"../src/cookie.ts"
+		"../src/physics/*.ts"
 	],
 	"compilerOptions": {
 		"target": "es2024",
 		"module": "es2022",
-		"rootDir": "../src",
+		"rootDir": "../src/physics",
 		"outDir": "./js",
 		"sourceMap": true,
 		"esModuleInterop": true,
