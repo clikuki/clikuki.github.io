@@ -28,6 +28,7 @@ export class PhysicsObject {
 
 export class Physics {
 	public objects: PhysicsObject[] = []
+	public t = 0;
 	private dt = 0.01;
 	private dtSqr = this.dt * this.dt;
 	private currentTime = performance.now();
@@ -36,30 +37,23 @@ export class Physics {
 	private gravity = { x: 0, y: 10 };
 	private dragCoefficient = 10;
 	private restitutionCoefficient = .7;
-	// private frictionCoefficient = .8;
 
 	public spawn(x: number, y: number): PhysicsObject {
-		// const minRadius = 10;
-		// const maxRadius = 30;
-		// const radius = Math.random() * (maxRadius - minRadius) + minRadius;
-		const radius = 30;
+		const minRadius = 20;
+		const maxRadius = 40;
+		const radius = Math.random() * (maxRadius - minRadius) + minRadius;
 		const mass = Math.PI * radius * radius;
-		// const mass = 1;
 
-		// const initVelLength = Math.random() + .1;
-		// const initVelAngle = Math.random() * -Math.PI;
+		const initVelLength = Math.random() + .1;
+		const initVelAngle = Math.random() * -Math.PI;
 		const initVelocity = {
-			// x: initVelLength * Math.cos(initVelAngle),
-			// y: initVelLength * Math.sin(initVelAngle),
-			x: 0,
-			y: 0,
+			x: initVelLength * Math.cos(initVelAngle),
+			y: initVelLength * Math.sin(initVelAngle),
 		}
 
-		// const rotation = Math.random() * 2 * Math.PI - Math.PI;
-		const rotation = 0;
-		// const maxAngularVelocity = .05;
-		// const angularVelocity = Math.random() * maxAngularVelocity * 2 - maxAngularVelocity;
-		const angularVelocity = 0.5;
+		const rotation = Math.random() * 2 * Math.PI - Math.PI;
+		const maxAngularVelocity = .05;
+		const angularVelocity = Math.random() * maxAngularVelocity * 2 - maxAngularVelocity;
 
 		const position = { x, y };
 		const obj = new PhysicsObject(
@@ -71,6 +65,9 @@ export class Physics {
 			radius,
 			mass,
 		);
+
+		// DEBUG EDITS
+		obj.prevPos = position;
 
 		this.objects.push(obj);
 
@@ -131,54 +128,18 @@ export class Physics {
 			obj.pos.y = obj.radius;
 		}
 
-		// if(leftSide || rightSide) {
-		// 	obj.prevPos.x = obj.pos.x + velocity.x * this.restitutionCoefficient;
-		// }
-		// else if (topSide || bottomSide) {
-		// 	obj.prevPos.y = obj.pos.y + velocity.y * this.restitutionCoefficient;
-
-		// 	const contactVel = velocity.x + obj.radius * obj.angularVel;
-
-		// 	// velocity at contact + linear velocity = 0
-		// }
-
-
 		if(leftSide || rightSide) {
-			obj.isDead = true;
-
 			obj.prevPos.x = obj.pos.x + velocity.x * this.restitutionCoefficient;
-			obj.prevPos.y = obj.pos.y + newVelocities.linear.y;
+			obj.prevPos.y = obj.pos.y - newVelocities.linear.y;
 			obj.angularVel = newVelocities.angular.y;
 		}
 		else if (topSide || bottomSide) {
-			// console.log("collided! before", velocity.x, obj.angularVel);
-			
+			// console.log(newVelocities.linear.x, newVelocities.angular.x * obj.radius)
+
 			obj.prevPos.y = obj.pos.y + velocity.y * this.restitutionCoefficient;
-			obj.prevPos.x = obj.pos.x + newVelocities.linear.x;
+			obj.prevPos.x = obj.pos.x - newVelocities.linear.x;
 			obj.angularVel = newVelocities.angular.x;
-
-			// console.log("collided! after", velX, angularVel * obj.radius, velX + angularVel * obj.radius);
 		}
-
-		
-		// if(leftSide || rightSide) {
-		// 	const halfCircumference = Math.PI * obj.radius;
-		// 	const decayedVelocity = velocity.y * this.frictionCoefficient;
-		// 	const speedByHalfBodyLength = decayedVelocity / halfCircumference;
-
-		// 	obj.prevPos.x = obj.pos.x + velocity.x * this.restitutionCoefficient;
-		// 	obj.prevPos.y = obj.pos.y + decayedVelocity;
-		// 	obj.angularVel = speedByHalfBodyLength * Math.PI;
-		// }
-		// else if (topSide || bottomSide) {
-		// 	const halfCircumference = Math.PI * obj.radius;
-		// 	const decayedVelocity = velocity.x * this.frictionCoefficient;
-		// 	const speedByHalfBodyLength = decayedVelocity / halfCircumference;
-
-		// 	obj.prevPos.y = obj.pos.y + velocity.y * this.restitutionCoefficient;
-		// 	obj.prevPos.x = obj.pos.x - decayedVelocity;
-		// 	obj.angularVel = speedByHalfBodyLength * Math.PI;
-		// }
 	}
 	private velocitiesAfterCollision(obj: PhysicsObject) {
 		const velocity = Vector.sub(obj.pos, obj.prevPos);
@@ -235,6 +196,7 @@ export class Physics {
 		this.removeDead();
 		while(this.accumulator >= this.dt) {
 			this.updateObjects();
+			this.t += this.dt;
 			this.accumulator -= this.dt;
 		}
 
