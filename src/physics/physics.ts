@@ -37,6 +37,7 @@ export class Physics {
 	private gravity = { x: 0, y: 10 };
 	private dragCoefficient = 10;
 	private restitutionCoefficient = .7;
+	private rollingCoefficient = .01;
 
 	public spawn(x: number, y: number): PhysicsObject {
 		const minRadius = 20;
@@ -67,7 +68,7 @@ export class Physics {
 		);
 
 		// DEBUG EDITS
-		obj.prevPos = position;
+		// obj.prevPos = position;
 
 		this.objects.push(obj);
 
@@ -134,8 +135,6 @@ export class Physics {
 			obj.angularVel = newVelocities.angular.y;
 		}
 		else if (topSide || bottomSide) {
-			// console.log(newVelocities.linear.x, newVelocities.angular.x * obj.radius)
-
 			obj.prevPos.y = obj.pos.y + velocity.y * this.restitutionCoefficient;
 			obj.prevPos.x = obj.pos.x - newVelocities.linear.x;
 			obj.angularVel = newVelocities.angular.x;
@@ -143,20 +142,17 @@ export class Physics {
 	}
 	private velocitiesAfterCollision(obj: PhysicsObject) {
 		const velocity = Vector.sub(obj.pos, obj.prevPos);
-		const impulse = {
+
+		const rollingImpulse = {
 			x: -obj.mass / 3 * (velocity.x + obj.angularVel * obj.radius),
 			y: -obj.mass / 3 * (velocity.y + obj.angularVel * obj.radius),
 		}
 
+		const resistingImpulse = -this.rollingCoefficient * obj.radius * Math.sign(obj.angularVel);
+		const finalImpulse = Vector.addScalar(rollingImpulse, resistingImpulse);
 		return {
-			linear: {
-				x: velocity.x + impulse.x / obj.mass,
-				y: velocity.y + impulse.y / obj.mass,
-			},
-			angular: {
-				x: obj.angularVel + 2 * impulse.x / obj.mass / obj.radius,
-				y: obj.angularVel + 2 * impulse.y / obj.mass / obj.radius,
-			}
+			linear: Vector.add(velocity, Vector.div(rollingImpulse, obj.mass)),
+			angular: Vector.addScalar(Vector.mult(finalImpulse, 2 / obj.mass / obj.radius), obj.angularVel),
 		}
 	}
 
