@@ -15,10 +15,10 @@ export class Vector {
 
 export class PhysicsObject {
 	public isDead = false;
+	public netForces: Vector = { x: 0, y: 0 };
 	constructor(
 		public pos: Vector,
 		public prevPos: Vector,
-		public netForces: Vector,
 		public rot: number, // in radians
 		public angularVel: number, // in radians
 		public radius: number,
@@ -45,11 +45,11 @@ export class Physics {
 		const radius = Math.random() * (maxRadius - minRadius) + minRadius;
 		const mass = Math.PI * radius * radius;
 
-		const initVelLength = Math.random() + .1;
-		const initVelAngle = Math.random() * -Math.PI;
-		const initVelocity = {
-			x: initVelLength * Math.cos(initVelAngle),
-			y: initVelLength * Math.sin(initVelAngle),
+		const velLength = Math.random() + .1;
+		const velAngle = Math.random() * -Math.PI;
+		const velocity = {
+			x: velLength * Math.cos(velAngle),
+			y: velLength * Math.sin(velAngle),
 		}
 
 		const rotation = Math.random() * 2 * Math.PI - Math.PI;
@@ -59,8 +59,7 @@ export class Physics {
 		const position = { x, y };
 		const obj = new PhysicsObject(
 			position,
-			Vector.add(position, initVelocity),
-			{ x: 0, y: 0 },
+			Vector.sub(position, velocity),
 			rotation,
 			angularVelocity,
 			radius,
@@ -74,6 +73,11 @@ export class Physics {
 
 		return obj;
 	}
+
+	private getLinearVel(obj: PhysicsObject) {
+		return Vector.sub(obj.pos, obj.prevPos);
+	}
+
 	public applyForce(obj: PhysicsObject, force: Vector): void {
     obj.netForces = Vector.add(obj.netForces, Vector.div(force, obj.mass));
 	}
@@ -92,7 +96,7 @@ export class Physics {
 		this.applyForce(obj, force);
 	}
 	private applyDrag(obj: PhysicsObject) {
-		const vel = Vector.sub(obj.pos, obj.prevPos);
+		const vel = this.getLinearVel(obj);
 		if(Math.abs(vel.x) < .01 && Math.abs(vel.y) < .01) return;
 
 		const speed = Math.hypot(vel.x, vel.y);
@@ -107,7 +111,7 @@ export class Physics {
 	}
 
 	private constrainToView(obj: PhysicsObject): void {
-		const velocity = Vector.sub(obj.pos, obj.prevPos);
+		const velocity = this.getLinearVel(obj);
 		const newVelocities = this.velocitiesAfterCollision(obj);
 
 		const rightSide = obj.pos.x + obj.radius > innerWidth;
@@ -141,7 +145,7 @@ export class Physics {
 		}
 	}
 	private velocitiesAfterCollision(obj: PhysicsObject) {
-		const velocity = Vector.sub(obj.pos, obj.prevPos);
+		const velocity = this.getLinearVel(obj);
 
 		const rollingImpulse = {
 			x: -obj.mass / 3 * (velocity.x + obj.angularVel * obj.radius),
