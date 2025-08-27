@@ -16,11 +16,15 @@ export class Vector {
 export class PhysicsObject {
 	public isDead = false;
 	public netForces: Vector = { x: 0, y: 0 };
+	public netTorque = 0;
 	constructor(
 		public pos: Vector,
 		public prevPos: Vector,
-		public rot: number, // in radians
-		public angularVel: number, // in radians
+
+		// In radians
+		public rot: number,
+		public prevRot: number,
+		
 		public radius: number,
 		public mass: number,
 	) {}
@@ -40,7 +44,8 @@ export class Physics {
 	private rollingCoefficient = .01;
 
 	// Stops jittering, set somewhere between 0.002 and 0.0001
-	private minimumVelocity = 0.0005;
+	private minLinearVelocity = 0.0005;
+	private minAngularVelocity = 0.00001;
 
 	public spawn(x: number, y: number): PhysicsObject {
 		const minRadius = 20;
@@ -64,7 +69,7 @@ export class Physics {
 			position,
 			Vector.sub(position, velocity),
 			rotation,
-			angularVelocity,
+			rotation - angularVelocity,
 			radius,
 			mass,
 		);
@@ -81,23 +86,31 @@ export class Physics {
 		// TODO: figure out how to multiply by dt without having the simulation explode
 		return Vector.sub(obj.pos, obj.prevPos);
 	}
+	private getAngularVel(obj: PhysicsObject) {
+		return obj.rot - obj.prevRot;
+	}
 
 	public applyForce(obj: PhysicsObject, force: Vector): void {
     obj.netForces = Vector.add(obj.netForces, Vector.div(force, obj.mass));
 	}
 	private updateObject(obj: PhysicsObject) {
 		const prevPos = Vector.copy(obj.pos);
-		const velocity = this.getLinearVel(obj);
-		const speed = Math.hypot(velocity.x, velocity.y);
+		const prevRot = obj.rot;
+		const linearVel = this.getLinearVel(obj);
+		const angularVel = this.getAngularVel(obj);
+		const speed = Math.hypot(linearVel.x, linearVel.y);
 
-		if(speed > this.minimumVelocity) {
+		if(speed > this.minLinearVelocity) {
 			// p_t = 2 * p_{t-1} - p_{t-2} + a_t * dt^2
 			obj.pos = Vector.add(Vector.sub(Vector.mult(obj.pos, 2), obj.prevPos), Vector.mult(obj.netForces, this.dtSqr));
 		}
 		
-		obj.rot += obj.angularVel;
+		if(Math.abs(angularVel) > this.minAngularVelocity) {
+			obj.rot = 2 * obj.rot - obj.prevRot + obj.netTorque * this.dtSqr;
+		}
 		
 		obj.prevPos = prevPos;
+		obj.prevRot = prevRot;
 		obj.netForces = { x: 0, y: 0 };
 	}
 	private applyGravity(obj: PhysicsObject): void {
@@ -145,27 +158,28 @@ export class Physics {
 		if(leftSide || rightSide) {
 			obj.prevPos.x = obj.pos.x + velocity.x * this.restitutionCoefficient;
 			obj.prevPos.y = obj.pos.y - newVelocities.linear.y;
-			obj.angularVel = newVelocities.angular.y;
+			obj.prevRot = obj.rot - newVelocities.angular.y;
 		}
 		else if (topSide || bottomSide) {
 			obj.prevPos.y = obj.pos.y + velocity.y * this.restitutionCoefficient;
 			obj.prevPos.x = obj.pos.x - newVelocities.linear.x;
-			obj.angularVel = newVelocities.angular.x;
+			obj.prevRot = obj.rot - newVelocities.angular.x;
 		}
 	}
 	private velocitiesAfterCollision(obj: PhysicsObject) {
-		const velocity = this.getLinearVel(obj);
+		const linearVel = this.getLinearVel(obj);
+		const angularVel = this.getAngularVel(obj);
 
 		const rollingImpulse = {
-			x: -obj.mass / 3 * (velocity.x + obj.angularVel * obj.radius),
-			y: -obj.mass / 3 * (velocity.y + obj.angularVel * obj.radius),
+			x: -obj.mass / 3 * (linearVel.x + angularVel * obj.radius),
+			y: -obj.mass / 3 * (linearVel.y + angularVel * obj.radius),
 		}
 
-		const resistingImpulse = -this.rollingCoefficient * obj.radius * Math.sign(obj.angularVel);
+		const resistingImpulse = -this.rollingCoefficient * obj.radius * Math.sign(angularVel);
 		const finalImpulse = Vector.addScalar(rollingImpulse, resistingImpulse);
 		return {
-			linear: Vector.add(velocity, Vector.div(rollingImpulse, obj.mass)),
-			angular: Vector.addScalar(Vector.mult(finalImpulse, 2 / obj.mass / obj.radius), obj.angularVel),
+			linear: Vector.add(linearVel, Vector.div(rollingImpulse, obj.mass)),
+			angular: Vector.addScalar(Vector.mult(finalImpulse, 2 / obj.mass / obj.radius), angularVel),
 		}
 	}
 
