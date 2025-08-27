@@ -35,9 +35,12 @@ export class Physics {
 	private accumulator = 0;
 	
 	private gravity = { x: 0, y: 10 };
-	private dragCoefficient = 10;
+	private dragCoefficient = .01;
 	private restitutionCoefficient = .7;
 	private rollingCoefficient = .01;
+
+	// Stops jittering, set somewhere between 0.002 and 0.0001
+	private minimumVelocity = 0.0005;
 
 	public spawn(x: number, y: number): PhysicsObject {
 		const minRadius = 20;
@@ -75,6 +78,7 @@ export class Physics {
 	}
 
 	private getLinearVel(obj: PhysicsObject) {
+		// TODO: figure out how to multiply by dt without having the simulation explode
 		return Vector.sub(obj.pos, obj.prevPos);
 	}
 
@@ -83,13 +87,18 @@ export class Physics {
 	}
 	private updateObject(obj: PhysicsObject) {
 		const prevPos = Vector.copy(obj.pos);
+		const velocity = this.getLinearVel(obj);
+		const speed = Math.hypot(velocity.x, velocity.y);
 
-		// p_t = 2 * p_{t-1} - p_{t-2} + a_t * dt^2
-		obj.pos = Vector.add(Vector.sub(Vector.mult(obj.pos, 2), obj.prevPos), Vector.mult(obj.netForces, this.dtSqr));
+		if(speed > this.minimumVelocity) {
+			// p_t = 2 * p_{t-1} - p_{t-2} + a_t * dt^2
+			obj.pos = Vector.add(Vector.sub(Vector.mult(obj.pos, 2), obj.prevPos), Vector.mult(obj.netForces, this.dtSqr));
+		}
+		
+		obj.rot += obj.angularVel;
+		
 		obj.prevPos = prevPos;
 		obj.netForces = { x: 0, y: 0 };
-
-		obj.rot += obj.angularVel;
 	}
 	private applyGravity(obj: PhysicsObject): void {
 		const force = Vector.mult(this.gravity, obj.mass);
@@ -202,6 +211,13 @@ export class Physics {
 
 		const alpha = this.accumulator / this.dt;
 		return alpha;
+	}
+
+	public debug_log_oddities(obj: PhysicsObject, kill = true) {
+		if(JSON.stringify(obj).includes("null")) {
+			console.table(obj);
+			obj.isDead = kill;
+		}		
 	}
 
 	/** FOR DEBUG ONLY; FOR STEPPING THRU PHYSICS ONE BY ONE */
