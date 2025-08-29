@@ -80,11 +80,11 @@ export class Physics {
 		);
 
 		// DEBUG EDITS
-		obj.radius = 30;
-		obj.velocity = { x: 0, y: 0 };
-		obj.angularVelocity = -.02;
-		obj.prevPosition = Vector.sub(position, obj.velocity);
-		obj.prevRotation = rotation - obj.angularVelocity;
+		// obj.radius = 30;
+		// obj.velocity = { x: 0, y: 0 };
+		// obj.angularVelocity = -.03;
+		// obj.prevPosition = Vector.sub(position, obj.velocity);
+		// obj.prevRotation = rotation - obj.angularVelocity;
 
 		this.objects.push(obj);
 
@@ -110,8 +110,6 @@ export class Physics {
 		obj.prevRotation = prevRot;
 		obj.netForces = { x: 0, y: 0 };
 
-		// console.debug("POS_SOLVE");
-		// console.table(obj);
 		this.debug_logIfNaN(obj, () => {
 			console.log(
 				obj.netForces,
@@ -125,9 +123,8 @@ export class Physics {
 	private updateVelocities(obj: PhysicsObject) {
 		obj.velocity = Vector.div(Vector.sub(obj.position, obj.prevPosition), this.dt);
 		obj.angularVelocity = (obj.rotation - obj.prevRotation) / this.dt;
-		
-		// console.debug("NEW_VELS");
-		// console.table(obj);
+		// obj.velocity = Vector.sub(obj.position, obj.prevPosition);
+		// obj.angularVelocity = obj.rotation - obj.prevRotation;
 	}
 	private applyGravity(obj: PhysicsObject): void {
 		const force = Vector.mult(this.gravity, obj.mass);
@@ -145,9 +142,6 @@ export class Physics {
 		const force = Vector.mult(dir, scalarPart);
 		this.applyForce(obj, force);
 
-		// console.debug("DRAG");
-		// console.table({ vel: obj.velocity, dir, surface, speed, scalarPart, force })
-		// console.table(obj);
 	}
 
 	private constrainToView(obj: PhysicsObject): void {
@@ -177,19 +171,11 @@ export class Physics {
 			obj.prevPosition.x = obj.position.x + obj.velocity.x * this.restitutionCoefficient * this.dt;
 			obj.prevPosition.y = obj.position.y - newVelocities.linear.y * this.dt;
 			obj.prevRotation = obj.rotation - newVelocities.angular.y * this.dt;
-
-			obj.isDead = true;
 		}
 		else if (topSide || bottomSide) {
 			obj.prevPosition.y = obj.position.y + obj.velocity.y * this.restitutionCoefficient * this.dt;
 			obj.prevPosition.x = obj.position.x - newVelocities.linear.x * this.dt;
 			obj.prevRotation = obj.rotation - newVelocities.angular.x * this.dt;
-		}
-
-		if(this.objects.length && (leftSide || rightSide || topSide || bottomSide)) {
-			// console.warn(`COLLIDED AT CALL #${this.t}`);
-			// console.table(obj);
-			// console.table(newVelocities);
 		}
 	}
 	private velocitiesAfterCollision(obj: PhysicsObject) {
@@ -244,8 +230,6 @@ export class Physics {
 
 		this.removeDead();
 		while(this.accumulator >= this.dt) {
-			// if(this.objects.length) console.log(`Call #${this.t}`)
-
 			this.updateObjects();
 			this.t += this.dt;
 			this.accumulator -= this.dt;
@@ -263,7 +247,6 @@ export class Physics {
 		cb?: (obj: PhysicsObject) => void,
 	) {
 		if(!this.debug_containsInvalid(obj)) return;
-		// console.table(obj);
 		cb?.(obj);
 	}
 
