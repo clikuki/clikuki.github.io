@@ -8,16 +8,15 @@ export class Renderer {
 	public add(obj: PhysicsObject): HTMLImageElement {
 		const elem = document.createElement("img");
 		elem.src = Renderer.imgSrc;
-		elem.style.left = `${obj.pos.x - obj.radius}px`;
-		elem.style.top = `${obj.pos.y - obj.radius}px`;
+		elem.style.left = `${obj.position.x - obj.radius}px`;
+		elem.style.top = `${obj.position.y - obj.radius}px`;
 		elem.style.width = `${obj.radius + obj.radius}px`;
 
 		this.containerEl.appendChild(elem);
 		this.elements.set(obj, elem);
 		return elem;
 	}
-	public update(alpha: number) {
-		const oneMinusAlpha = 1 - alpha;
+	public update() {
 		for(const obj of this.physObjects) {
 			let elem = this.elements.get(obj);
 			if(obj.isDead) {
@@ -28,9 +27,9 @@ export class Renderer {
 			}
 			else {
 				elem ??= this.add(obj);
-				elem.style.left = `${obj.pos.x * alpha + obj.prevPos.x * oneMinusAlpha - obj.radius}px`;
-				elem.style.top = `${obj.pos.y * alpha + obj.prevPos.y * oneMinusAlpha - obj.radius}px`;
-				elem.style.rotate = `${Math.PI / 2 - obj.rot}rad`;
+				elem.style.left = `${obj.position.x - obj.radius}px`;
+				elem.style.top = `${obj.position.y - obj.radius}px`;
+				elem.style.rotate = `${Math.PI / 2 - obj.rotation}rad`;
 			}
 		}
 	}

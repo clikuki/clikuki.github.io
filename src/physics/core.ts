@@ -29,10 +29,27 @@ function main() {
 	})
 
 	try {
+		// let last = performance.now();
+		// const birth = new Map<typeof physics.objects[0], number>();
 		requestAnimationFrame(function updateLoop(t) {
-			const alpha = physics.update(t);
-			renderer.update(alpha);
-			// renderer.update(t*0);
+			// if(t - last < (1000 / 60)) {
+			// 	requestAnimationFrame(updateLoop);
+			// 	return;
+			// }
+			// last = t;
+
+			// for(const obj of physics.objects) {
+			// 	if(obj.isDead) {
+			// 		console.log(t - birth.get(obj)!);
+			// 		birth.delete(obj);
+			// 	}
+			// 	else if(!birth.has(obj)) {
+			// 		birth.set(obj, t);
+			// 	}
+			// }
+
+			physics.update(t);
+			renderer.update();
 			requestAnimationFrame(updateLoop);
 		})
 	}
