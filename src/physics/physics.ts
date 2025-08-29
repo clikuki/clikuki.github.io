@@ -17,17 +17,21 @@ export class PhysicsObject {
 	public isDead = false;
 	public netForces: Vector = { x: 0, y: 0 };
 	public netTorque = 0;
-	constructor(
-		public pos: Vector,
-		public prevPos: Vector,
+	
+	public prevPosition: Vector;
+	public prevRotation: number
 
-		// In radians
-		public rot: number,
-		public prevRot: number,
-		
+	constructor(
+		public position: Vector,
+		public velocity: Vector,
+		public rotation: number,
+		public angularVelocity: number,
 		public radius: number,
 		public mass: number,
-	) {}
+	) {
+		this.prevPosition = Vector.sub(position, velocity);
+		this.prevRotation = rotation - angularVelocity;
+	}
 }
 
 export class Physics {
@@ -67,128 +71,149 @@ export class Physics {
 		const position = { x, y };
 		const obj = new PhysicsObject(
 			position,
-			Vector.sub(position, velocity),
+			velocity,
 			rotation,
-			rotation - angularVelocity,
+			angularVelocity,
 			radius,
 			mass,
 		);
 
 		// DEBUG EDITS
-		// obj.prevPos = position;
+		obj.prevPosition = Vector.sub(position, {
+			x: 1,
+			y: 1,
+		});
 
 		this.objects.push(obj);
 
 		return obj;
 	}
 
-	private getLinearVel(obj: PhysicsObject) {
-		// TODO: figure out how to multiply by dt without having the simulation explode
-		return Vector.sub(obj.pos, obj.prevPos);
-	}
-	private getAngularVel(obj: PhysicsObject) {
-		return obj.rot - obj.prevRot;
-	}
-
 	public applyForce(obj: PhysicsObject, force: Vector): void {
     obj.netForces = Vector.add(obj.netForces, Vector.div(force, obj.mass));
 	}
-	private updateObject(obj: PhysicsObject) {
-		const prevPos = Vector.copy(obj.pos);
-		const prevRot = obj.rot;
-		const linearVel = this.getLinearVel(obj);
-		const angularVel = this.getAngularVel(obj);
-		const speed = Math.hypot(linearVel.x, linearVel.y);
+	private solvePositionAndRotation(obj: PhysicsObject) {
+		const prevPos = Vector.copy(obj.position);
+		const prevRot = obj.rotation;
+		const speed = Math.hypot(obj.velocity.x, obj.velocity.y);
 
+		// pos_next = (2)(pos) - p_prev + (forces)(dt)(dt)
 		if(speed > this.minLinearVelocity) {
-			// p_t = 2 * p_{t-1} - p_{t-2} + a_t * dt^2
-			obj.pos = Vector.add(Vector.sub(Vector.mult(obj.pos, 2), obj.prevPos), Vector.mult(obj.netForces, this.dtSqr));
+			obj.position = Vector.add(Vector.sub(Vector.mult(obj.position, 2), obj.prevPosition), Vector.mult(obj.netForces, this.dtSqr));
 		}
 		
-		if(Math.abs(angularVel) > this.minAngularVelocity) {
-			obj.rot = 2 * obj.rot - obj.prevRot + obj.netTorque * this.dtSqr;
+		if(Math.abs(obj.angularVelocity) > this.minAngularVelocity) {
+			obj.rotation = 2 * obj.rotation - obj.prevRotation + obj.netTorque * this.dtSqr;
 		}
+
+		console.table(obj);
+		this.debug_logIfNaN(obj, () => {
+			console.log(
+				obj.netForces,
+				this.dtSqr,
+				Vector.mult(obj.netForces, this.dtSqr)
+			);
+
+			obj.isDead = true;
+		})
 		
-		obj.prevPos = prevPos;
-		obj.prevRot = prevRot;
+		obj.prevPosition = prevPos;
+		obj.prevRotation = prevRot;
 		obj.netForces = { x: 0, y: 0 };
+	}
+	private updateVelocities(obj: PhysicsObject) {
+		obj.velocity = Vector.div(Vector.sub(obj.position, obj.prevPosition), 1);
+		obj.angularVelocity = (obj.rotation - obj.prevRotation) / 1;
 	}
 	private applyGravity(obj: PhysicsObject): void {
 		const force = Vector.mult(this.gravity, obj.mass);
 		this.applyForce(obj, force);
 	}
 	private applyDrag(obj: PhysicsObject) {
-		const vel = this.getLinearVel(obj);
-		if(Math.abs(vel.x) < .01 && Math.abs(vel.y) < .01) return;
+		if(Math.abs(obj.velocity.x) < .01 && Math.abs(obj.velocity.y) < .01) return;
 
-		const speed = Math.hypot(vel.x, vel.y);
-		const dir = Vector.div(vel, speed);
+		const speed = Math.hypot(obj.velocity.x, obj.velocity.y);
+		const dir = Vector.div(obj.velocity, speed);
 		const surface = obj.radius * 2;
 
 		// force = dir * -1 * speed^2 * surface * dragCoeffiencnt
 		const scalarPart = -speed * speed * surface * this.dragCoefficient;
 		const force = Vector.mult(dir, scalarPart);
+		console.debug("DRAG");
+		console.table({ vel: obj.velocity, dir, surface, speed, scalarPart, force })
 		this.applyForce(obj, force);
-		
 	}
 
 	private constrainToView(obj: PhysicsObject): void {
-		const velocity = this.getLinearVel(obj);
+		// const velocity = Vector.sub(obj.pos, obj.prevPos);
 		const newVelocities = this.velocitiesAfterCollision(obj);
 
-		const rightSide = obj.pos.x + obj.radius > innerWidth;
-		const leftSide = obj.pos.x - obj.radius < 0;
-		const bottomSide = obj.pos.y + obj.radius > innerHeight;
-		const topSide = obj.pos.y - obj.radius < 0;
+		const rightSide = obj.position.x + obj.radius > innerWidth;
+		const leftSide = obj.position.x - obj.radius < 0;
+		const bottomSide = obj.position.y + obj.radius > innerHeight;
+		const topSide = obj.position.y - obj.radius < 0;
 
 		if(rightSide) {
-			obj.pos.x = innerWidth - obj.radius;
+			obj.position.x = innerWidth - obj.radius;
 		}
 		else if(leftSide) {
-			obj.pos.x = obj.radius;
+			obj.position.x = obj.radius;
 		}
 		
 		if(bottomSide) {
-			obj.pos.y = innerHeight - obj.radius;
+			obj.position.y = innerHeight - obj.radius;
 		}
 		else if(topSide) {
-			obj.pos.y = obj.radius;
+			obj.position.y = obj.radius;
+		}
+
+		if(leftSide || rightSide || topSide || bottomSide) {
+			console.warn("COLLIDED");
+			const newVel = Vector.sub(obj.position, obj.prevPosition);
+			console.table({
+				prev: {...obj.velocity, spd: Math.hypot(obj.velocity.x, obj.velocity.y)},
+				cur: {...newVel, spd: Math.hypot(newVel.x, newVel.y)},
+			})
+			console.table(newVelocities);
+			console.table(obj);
+			console.log("collide log fin");
 		}
 
 		if(leftSide || rightSide) {
-			obj.prevPos.x = obj.pos.x + velocity.x * this.restitutionCoefficient;
-			obj.prevPos.y = obj.pos.y - newVelocities.linear.y;
-			obj.prevRot = obj.rot - newVelocities.angular.y;
+			obj.prevPosition.x = obj.position.x + obj.velocity.x * this.restitutionCoefficient;
+			obj.prevPosition.y = obj.position.y - newVelocities.linear.y;
+			obj.prevRotation = obj.rotation - newVelocities.angular.y;
 		}
 		else if (topSide || bottomSide) {
-			obj.prevPos.y = obj.pos.y + velocity.y * this.restitutionCoefficient;
-			obj.prevPos.x = obj.pos.x - newVelocities.linear.x;
-			obj.prevRot = obj.rot - newVelocities.angular.x;
+			obj.prevPosition.y = obj.position.y + obj.velocity.y * this.restitutionCoefficient;
+			obj.prevPosition.x = obj.position.x - newVelocities.linear.x;
+			obj.prevRotation = obj.rotation - newVelocities.angular.x;
 		}
 	}
 	private velocitiesAfterCollision(obj: PhysicsObject) {
-		const linearVel = this.getLinearVel(obj);
-		const angularVel = this.getAngularVel(obj);
-
+		// TODO: solve issue causing velocities to explode out of control
 		const rollingImpulse = {
-			x: -obj.mass / 3 * (linearVel.x + angularVel * obj.radius),
-			y: -obj.mass / 3 * (linearVel.y + angularVel * obj.radius),
+			x: -obj.mass / 3 * (obj.velocity.x + obj.angularVelocity * obj.radius),
+			y: -obj.mass / 3 * (obj.velocity.y + obj.angularVelocity * obj.radius),
 		}
 
-		const resistingImpulse = -this.rollingCoefficient * obj.radius * Math.sign(angularVel);
+		const resistingImpulse = -this.rollingCoefficient * obj.radius * Math.sign(obj.angularVelocity);
 		const finalImpulse = Vector.addScalar(rollingImpulse, resistingImpulse);
 		return {
-			linear: Vector.add(linearVel, Vector.div(rollingImpulse, obj.mass)),
-			angular: Vector.addScalar(Vector.mult(finalImpulse, 2 / obj.mass / obj.radius), angularVel),
+			linear: Vector.add(obj.velocity, Vector.div(rollingImpulse, obj.mass)),
+			angular: Vector.addScalar(Vector.mult(finalImpulse, 2 / obj.mass / obj.radius), obj.angularVelocity),
 		}
 	}
 
 	private updateObjects() {
 		for(const obj of this.objects) {
+			if(obj.isDead) continue;
+			
 			this.applyGravity(obj);
 			this.applyDrag(obj);
-			this.updateObject(obj);
+			this.solvePositionAndRotation(obj);
 			this.constrainToView(obj);
+			this.updateVelocities(obj);
 		}
 	}
 
@@ -218,6 +243,8 @@ export class Physics {
 
 		this.removeDead();
 		while(this.accumulator >= this.dt) {
+			if(this.objects.length) console.log(`Call #${this.t}`)
+
 			this.updateObjects();
 			this.t += this.dt;
 			this.accumulator -= this.dt;
@@ -227,11 +254,16 @@ export class Physics {
 		return alpha;
 	}
 
-	public debug_log_oddities(obj: PhysicsObject, kill = true) {
-		if(JSON.stringify(obj).includes("null")) {
-			console.table(obj);
-			obj.isDead = kill;
-		}		
+	public debug_containsInvalid(obj: PhysicsObject): boolean {
+		return /null|undefined/.test(JSON.stringify(obj));
+	}
+	public debug_logIfNaN(
+		obj: PhysicsObject,
+		cb?: (obj: PhysicsObject) => void,
+	) {
+		if(!this.debug_containsInvalid(obj)) return;
+		console.table(obj);
+		cb?.(obj);
 	}
 
 	/** FOR DEBUG ONLY; FOR STEPPING THRU PHYSICS ONE BY ONE */
