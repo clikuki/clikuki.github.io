@@ -136,20 +136,18 @@ export class Physics {
 	public applyForce(obj: PhysicsObject, force: Vector): void {
     obj.netForces = Vector.add(obj.netForces, Vector.div(force, obj.mass));
 	}
-	private solvePositionAndRotation(obj: PhysicsObject) {
+	private solvePosition(obj: PhysicsObject) {
 		const prevPos = Vector.copy(obj.position);
-		const prevRot = obj.rotation;
 		const speed = Vector.mag(obj.velocity);
 
 		// pos_next = (2)(pos) - p_prev + (forces)(dt)(dt)
 		obj.position = Vector.add(Vector.sub(Vector.mult(obj.position, 2), obj.prevPosition), Vector.mult(obj.netForces, this.dtSqr));
-		obj.rotation = 2 * obj.rotation - obj.prevRotation + obj.netTorque * this.dtSqr;
-
-		if(speed < this.minSpeed) obj.prevPosition = obj.position;
-		if(Math.abs(obj.angularVelocity) < this.minSpin) obj.prevRotation = obj.rotation;
+		
+		if(speed < this.minSpeed) {
+			obj.prevPosition = obj.position;
+		}
 		
 		obj.prevPosition = prevPos;
-		obj.prevRotation = prevRot;
 		obj.netForces = { x: 0, y: 0 };
 
 		this.debug_logIfNaN(obj, () => {
@@ -161,6 +159,19 @@ export class Physics {
 
 			obj.isDead = true;
 		})
+	}
+	private solveRotation(obj: PhysicsObject) {
+		const prevRot = obj.rotation;
+
+		// rot_next = (2)(rot) - rot_prev + (torque)(dt)(dt)
+		obj.rotation = 2 * obj.rotation - obj.prevRotation + obj.netTorque * this.dtSqr;
+
+		if(Math.abs(obj.angularVelocity) < this.minSpin) {
+			obj.prevRotation = obj.rotation;
+		}
+	
+		obj.prevRotation = prevRot;
+		obj.netTorque = 0;
 	}
 	private updateVelocities(obj: PhysicsObject) {
 		obj.velocity = Vector.div(Vector.sub(obj.position, obj.prevPosition), this.dt);
@@ -240,8 +251,12 @@ export class Physics {
 			
 			this.applyGravity(obj);
 			this.applyDrag(obj);
-			this.solvePositionAndRotation(obj);
+
+			this.solvePosition(obj);
+			this.solveRotation(obj);
+
 			this.constrainToView(obj);
+			
 			this.updateVelocities(obj);
 		}
 	}
