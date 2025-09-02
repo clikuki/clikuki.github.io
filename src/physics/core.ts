@@ -6,10 +6,11 @@ function main() {
 
 	const clickerEl = document.querySelector("img.cookie") as HTMLImageElement;
 	const bitContainerEl = document.querySelector(".cookie-bits") as HTMLElement;
+	const collidableElems = Array.from(document.querySelectorAll("[data-collidable]")) as HTMLElement[];
 
 	clickerEl.classList.add("js-enabled")
 
-	const physics = new Physics();
+	const physics = new Physics(collidableElems);
 	const renderer = new Renderer(
 		physics.objects,
 		bitContainerEl,

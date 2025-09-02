@@ -11,6 +11,7 @@
 		}
 
 		body {
+			position: relative;
 			display: flex;
 			align-items: center;
 			justify-content: center;
@@ -69,10 +70,19 @@
 			width: 1rem;
 			aspect-ratio: 1;
 		}
+
+		[data-collidable] {
+			position: absolute;
+			background-color: darkgreen;
+			z-index: -1;
+		}
 	</style>
 </head>
 <body>
 	<img class="cookie" src="pixel_cookie.png" alt="A big cookie?" draggable="false">
 	<div class="cookie-bits"></div>
+	<div class="collidables">
+		<div data-collidable style="width: 10rem; height: 15rem; left: 15%; top: 60%;"></div>
+	</div>
 </body>
 </html>

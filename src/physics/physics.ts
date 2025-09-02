@@ -35,8 +35,46 @@ export class PhysicsObject {
 	}
 }
 
+interface ColliderInfo {
+	x: number;
+	y: number;
+
+	width: number;
+	height: number;
+
+	bottom: number;
+	right: number;
+	
+	center: Vector;
+};
+class Collider {
+	constructor(public element: HTMLElement) {}
+
+	get info(): ColliderInfo {
+		const ElemRect = this.element.getBoundingClientRect();
+		return {
+			x: ElemRect.x,
+			y: ElemRect.y,
+
+			width: ElemRect.width,
+			height: ElemRect.height,
+
+			bottom: ElemRect.bottom,
+			right: ElemRect.right,
+
+			get center() {
+				return {
+					x: ElemRect.x + ElemRect.width / 2,
+					y: ElemRect.y + ElemRect.width / 2,
+				}
+			},
+		}
+	}
+}
+
 export class Physics {
 	public objects: PhysicsObject[] = []
+	public colliders: Collider[];
 	public t = 0;
 	private dt = 0.01;
 	private dtSqr = this.dt * this.dt;
@@ -51,6 +89,10 @@ export class Physics {
 	// Stops jittering, set somewhere between 0.002 and 0.0001
 	private minSpeed = 0.0005;
 	private minSpin = 0.00001;
+
+	constructor(colliderElems: HTMLElement[]) {
+		this.colliders = colliderElems.map(elem => new Collider(elem));
+	}
 
 	public spawn(x: number, y: number): PhysicsObject {
 		const minRadius = 20;
