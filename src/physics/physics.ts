@@ -4,6 +4,7 @@ export interface Vector {
 };
 export class Vector {
 	private constructor() {}
+	static fromAngle(rad: number, mag = 1) { return { x: mag * Math.cos(rad), y: mag * Math.sin(rad) } }
 	static copy(one: Vector) { return { x: one.x, y: one.y } }
 	static add(one: Vector, two: Vector) { return { x: one.x + two.x, y: one.y + two.y } }
 	static sub(one: Vector, two: Vector) { return { x: one.x - two.x, y: one.y - two.y } }
@@ -41,6 +42,8 @@ interface ColliderInfo {
 
 	width: number;
 	height: number;
+	halfWidth: number;
+	halfHeight: number;
 
 	bottom: number;
 	right: number;
@@ -50,7 +53,7 @@ interface ColliderInfo {
 class Collider {
 	constructor(public element: HTMLElement) {}
 
-	get info(): ColliderInfo {
+	getInfo(): ColliderInfo {
 		const ElemRect = this.element.getBoundingClientRect();
 		return {
 			x: ElemRect.x,
@@ -58,6 +61,8 @@ class Collider {
 
 			width: ElemRect.width,
 			height: ElemRect.height,
+			halfWidth: ElemRect.width / 2,
+			halfHeight: ElemRect.height / 2,
 
 			bottom: ElemRect.bottom,
 			right: ElemRect.right,
@@ -65,7 +70,7 @@ class Collider {
 			get center() {
 				return {
 					x: ElemRect.x + ElemRect.width / 2,
-					y: ElemRect.y + ElemRect.width / 2,
+					y: ElemRect.y + ElemRect.height / 2,
 				}
 			},
 		}
@@ -122,11 +127,11 @@ export class Physics {
 		);
 
 		// DEBUG EDITS
-		// obj.radius = 30;
-		// obj.velocity = { x: 0, y: 0 };
-		// obj.angularVelocity = -.03;
-		// obj.prevPosition = Vector.sub(position, obj.velocity);
-		// obj.prevRotation = rotation - obj.angularVelocity;
+		obj.radius = 30;
+		obj.velocity = { x: -.3, y: -.3 };
+		obj.angularVelocity = 0;
+		obj.prevPosition = Vector.sub(position, obj.velocity);
+		obj.prevRotation = rotation - obj.angularVelocity;
 
 		this.objects.push(obj);
 
@@ -198,9 +203,6 @@ export class Physics {
 	}
 
 	private constrainToView(obj: PhysicsObject): void {
-		// const velocity = Vector.sub(obj.pos, obj.prevPos);
-		const newVelocities = this.velocitiesAfterCollision(obj);
-
 		const rightSide = obj.position.x + obj.radius > innerWidth;
 		const leftSide = obj.position.x - obj.radius < 0;
 		const bottomSide = obj.position.y + obj.radius > innerHeight;
@@ -221,27 +223,78 @@ export class Physics {
 		}
 
 		if(leftSide || rightSide) {
+			const newVelocities = this.getSpeedsAfterCollision(obj.velocity.y, obj);
 			obj.prevPosition.x = obj.position.x + obj.velocity.x * this.restitutionCoefficient * this.dt;
-			obj.prevPosition.y = obj.position.y - newVelocities.linear.y * this.dt;
-			obj.prevRotation = obj.rotation - newVelocities.angular.y * this.dt;
+			obj.prevPosition.y = obj.position.y - (obj.velocity.y + newVelocities.linear) * this.dt;
+			obj.prevRotation = obj.rotation - (obj.angularVelocity + newVelocities.angular) * this.dt;
 		}
 		else if (topSide || bottomSide) {
+			const newVelocities = this.getSpeedsAfterCollision(obj.velocity.x, obj);
 			obj.prevPosition.y = obj.position.y + obj.velocity.y * this.restitutionCoefficient * this.dt;
-			obj.prevPosition.x = obj.position.x - newVelocities.linear.x * this.dt;
-			obj.prevRotation = obj.rotation - newVelocities.angular.x * this.dt;
+			obj.prevPosition.x = obj.position.x - (obj.velocity.x + newVelocities.linear) * this.dt;
+			obj.prevRotation = obj.rotation - (obj.angularVelocity + newVelocities.angular) * this.dt;
 		}
 	}
-	private velocitiesAfterCollision(obj: PhysicsObject) {
-		const rollingImpulse = {
-			x: -obj.mass / 3 * (obj.velocity.x + obj.angularVelocity * obj.radius),
-			y: -obj.mass / 3 * (obj.velocity.y + obj.angularVelocity * obj.radius),
-		}
 
+	private getSpeedsAfterCollision(speed: number, obj: PhysicsObject) {
+		// const rollingImpulse = {
+		// 	x: -obj.mass / 3 * (obj.velocity.x + obj.angularVelocity * obj.radius),
+		// 	y: -obj.mass / 3 * (obj.velocity.y + obj.angularVelocity * obj.radius),
+		// }
+
+		// const resistingImpulse = -this.rollingCoefficient * obj.radius * Math.sign(obj.angularVelocity);
+		// const finalImpulse = Vector.addScalar(rollingImpulse, resistingImpulse);
+		// {
+		// 	linear: Vector.add(obj.velocity, Vector.div(rollingImpulse, obj.mass)),
+		// 	angular: Vector.addScalar(Vector.mult(finalImpulse, 2 / obj.mass / obj.radius), obj.angularVelocity),
+		// }
+
+		const rollingImpulse = (speed + obj.angularVelocity * obj.radius) * obj.mass / -3;
 		const resistingImpulse = -this.rollingCoefficient * obj.radius * Math.sign(obj.angularVelocity);
-		const finalImpulse = Vector.addScalar(rollingImpulse, resistingImpulse);
+		const finalImpulse = rollingImpulse + resistingImpulse;
+
 		return {
-			linear: Vector.add(obj.velocity, Vector.div(rollingImpulse, obj.mass)),
-			angular: Vector.addScalar(Vector.mult(finalImpulse, 2 / obj.mass / obj.radius), obj.angularVelocity),
+			linear: rollingImpulse / obj.mass,
+			angular: finalImpulse * 2 / obj.mass / obj.radius,
+		}
+	}
+	
+	private solveColliders(obj: PhysicsObject): void {
+		for(const collider of this.colliders) {
+			const info =  collider.getInfo();
+			const diff = Vector.sub(obj.position, info.center);
+			const closest = {
+				x: Math.max(Math.min(diff.x, info.halfWidth), -info.halfWidth),
+				y: Math.max(Math.min(diff.y, info.halfHeight), -info.halfHeight),
+			}
+
+			const dist = Vector.sub(diff, closest);
+			const distMag = Vector.mag(dist);
+			if(distMag >= obj.radius) continue;
+
+			// Solve collision
+			// 1. Push out
+			const penetrationDepth = obj.radius - distMag;
+			const penetrationVector = Vector.mult(diff, penetrationDepth / distMag);
+			obj.position = Vector.add(obj.position, penetrationVector);
+
+			// 2. Reflect velocity angle
+			const normalAngle = Math.atan2(dist.y, dist.x);
+			const incomingAngle = Math.atan2(obj.velocity.y, obj.velocity.x);
+			const reflectedAngle = normalAngle + normalAngle - incomingAngle;
+
+			// 3. Balance linear and rotational velocities
+			const speed = Vector.mag(obj.velocity);
+			const speedAlongTangent = speed * Math.sin(normalAngle - reflectedAngle);
+			const balancedVel = this.getSpeedsAfterCollision(speedAlongTangent, obj);
+			const relAxisAngleX = reflectedAngle - normalAngle;
+			const trueSpinVelocity = Vector.fromAngle(relAxisAngleX, balancedVel.linear);
+			const reflectedVelocity = Vector.fromAngle(reflectedAngle, speed);
+			const finalVelocity = Vector.add(reflectedVelocity, trueSpinVelocity);
+			
+
+			obj.prevPosition = Vector.add(obj.position, Vector.mult(finalVelocity, this.dt));
+			obj.prevRotation = obj.rotation - balancedVel.angular * this.dt;
 		}
 	}
 
@@ -249,14 +302,15 @@ export class Physics {
 		for(const obj of this.objects) {
 			if(obj.isDead) continue;
 			
-			this.applyGravity(obj);
+			// this.applyGravity(obj);
 			this.applyDrag(obj);
 
 			this.solvePosition(obj);
 			this.solveRotation(obj);
 
 			this.constrainToView(obj);
-			
+			this.solveColliders(obj);
+
 			this.updateVelocities(obj);
 		}
 	}
