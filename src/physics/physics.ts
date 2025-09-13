@@ -1,10 +1,6 @@
-export interface Vector {
-	x: number,
-	y: number,
-};
 export class Vector {
-	private constructor() {}
-	static fromAngle(rad: number, mag = 1) { return { x: mag * Math.cos(rad), y: mag * Math.sin(rad) } }
+	constructor(public x: number, public y: number) {}
+	static from(rad: number, mag = 1) { return { x: mag * Math.cos(rad), y: mag * Math.sin(rad) } }
 	static copy(one: Vector) { return { x: one.x, y: one.y } }
 	static add(one: Vector, two: Vector) { return { x: one.x + two.x, y: one.y + two.y } }
 	static sub(one: Vector, two: Vector) { return { x: one.x - two.x, y: one.y - two.y } }
@@ -13,6 +9,15 @@ export class Vector {
 	static mult(one: Vector, scalar: number) { return { x: one.x * scalar, y: one.y * scalar } }
 	static div(one: Vector, scalar: number) { return { x: one.x / scalar, y: one.y / scalar } }
 	static mag(one: Vector) { return Math.hypot(one.x, one.y) }
+	static dot(one: Vector, two: Vector) { return one.x * two.x + one.y * two.y }
+	static project(one: Vector, two: Vector) {
+		const dot = this.dot(one, two);
+		const magSqr = this.mag(two) ** 2;
+		return {
+			x: dot / magSqr * two.x,
+			y: dot / magSqr * two.y,
+		}
+	}
 }
 
 export class PhysicsObject {
@@ -75,6 +80,15 @@ class Collider {
 			},
 		}
 	}
+}
+
+interface CollisionData {
+	object: PhysicsObject;
+	collider: Collider;
+	colliderInfo: ColliderInfo;
+	closest: Vector;
+	distVec: Vector;
+	distMag: number;
 }
 
 export class Physics {
@@ -184,6 +198,7 @@ export class Physics {
 		// obj.velocity = Vector.sub(obj.position, obj.prevPosition);
 		// obj.angularVelocity = obj.rotation - obj.prevRotation;
 	}
+	// @ts-expect-error
 	private applyGravity(obj: PhysicsObject): void {
 		const force = Vector.mult(this.gravity, obj.mass);
 		this.applyForce(obj, force);
@@ -199,7 +214,6 @@ export class Physics {
 		const scalarPart = -speed * speed * surface * this.dragCoefficient;
 		const force = Vector.mult(dir, scalarPart);
 		this.applyForce(obj, force);
-
 	}
 
 	private constrainToView(obj: PhysicsObject): void {
@@ -223,43 +237,32 @@ export class Physics {
 		}
 
 		if(leftSide || rightSide) {
-			const newVelocities = this.getSpeedsAfterCollision(obj.velocity.y, obj);
+			const velocityChange = this.computeVelocityChange(obj.velocity.y, obj);
 			obj.prevPosition.x = obj.position.x + obj.velocity.x * this.restitutionCoefficient * this.dt;
-			obj.prevPosition.y = obj.position.y - (obj.velocity.y + newVelocities.linear) * this.dt;
-			obj.prevRotation = obj.rotation - (obj.angularVelocity + newVelocities.angular) * this.dt;
+			obj.prevPosition.y = obj.position.y - (obj.velocity.y + velocityChange.linear) * this.dt;
+			obj.prevRotation = obj.rotation - (obj.angularVelocity + velocityChange.angular) * this.dt;
 		}
 		else if (topSide || bottomSide) {
-			const newVelocities = this.getSpeedsAfterCollision(obj.velocity.x, obj);
+			const velocityChange = this.computeVelocityChange(obj.velocity.x, obj);
 			obj.prevPosition.y = obj.position.y + obj.velocity.y * this.restitutionCoefficient * this.dt;
-			obj.prevPosition.x = obj.position.x - (obj.velocity.x + newVelocities.linear) * this.dt;
-			obj.prevRotation = obj.rotation - (obj.angularVelocity + newVelocities.angular) * this.dt;
+			obj.prevPosition.x = obj.position.x - (obj.velocity.x + velocityChange.linear) * this.dt;
+			obj.prevRotation = obj.rotation - (obj.angularVelocity + velocityChange.angular) * this.dt;
 		}
 	}
 
-	private getSpeedsAfterCollision(speed: number, obj: PhysicsObject) {
-		// const rollingImpulse = {
-		// 	x: -obj.mass / 3 * (obj.velocity.x + obj.angularVelocity * obj.radius),
-		// 	y: -obj.mass / 3 * (obj.velocity.y + obj.angularVelocity * obj.radius),
-		// }
-
-		// const resistingImpulse = -this.rollingCoefficient * obj.radius * Math.sign(obj.angularVelocity);
-		// const finalImpulse = Vector.addScalar(rollingImpulse, resistingImpulse);
-		// {
-		// 	linear: Vector.add(obj.velocity, Vector.div(rollingImpulse, obj.mass)),
-		// 	angular: Vector.addScalar(Vector.mult(finalImpulse, 2 / obj.mass / obj.radius), obj.angularVelocity),
-		// }
-
-		const rollingImpulse = (speed + obj.angularVelocity * obj.radius) * obj.mass / -3;
+	private computeVelocityChange(speed: number, obj: PhysicsObject) {
+		const rollingImpulse = -obj.mass / 3 * (speed + obj.angularVelocity * obj.radius);
 		const resistingImpulse = -this.rollingCoefficient * obj.radius * Math.sign(obj.angularVelocity);
 		const finalImpulse = rollingImpulse + resistingImpulse;
 
 		return {
-			linear: rollingImpulse / obj.mass,
-			angular: finalImpulse * 2 / obj.mass / obj.radius,
+			linear: speed + rollingImpulse / obj.mass,
+			angular: obj.angularVelocity + finalImpulse * 2 / (obj.mass * obj.radius),
 		}
 	}
-	
-	private solveColliders(obj: PhysicsObject): void {
+
+	private findCollisions(obj: PhysicsObject): CollisionData[] {
+		const hits: CollisionData[] = [];
 		for(const collider of this.colliders) {
 			const info =  collider.getInfo();
 			const diff = Vector.sub(obj.position, info.center);
@@ -268,34 +271,67 @@ export class Physics {
 				y: Math.max(Math.min(diff.y, info.halfHeight), -info.halfHeight),
 			}
 
-			const dist = Vector.sub(diff, closest);
-			const distMag = Vector.mag(dist);
-			if(distMag >= obj.radius) continue;
-
-			// Solve collision
-			// 1. Push out
-			const penetrationDepth = obj.radius - distMag;
-			const penetrationVector = Vector.mult(diff, penetrationDepth / distMag);
-			obj.position = Vector.add(obj.position, penetrationVector);
-
-			// 2. Reflect velocity angle
-			const normalAngle = Math.atan2(dist.y, dist.x);
-			const incomingAngle = Math.atan2(obj.velocity.y, obj.velocity.x);
-			const reflectedAngle = normalAngle + normalAngle - incomingAngle;
-
-			// 3. Balance linear and rotational velocities
-			const speed = Vector.mag(obj.velocity);
-			const speedAlongTangent = speed * Math.sin(normalAngle - reflectedAngle);
-			const balancedVel = this.getSpeedsAfterCollision(speedAlongTangent, obj);
-			const relAxisAngleX = reflectedAngle - normalAngle;
-			const trueSpinVelocity = Vector.fromAngle(relAxisAngleX, balancedVel.linear);
-			const reflectedVelocity = Vector.fromAngle(reflectedAngle, speed);
-			const finalVelocity = Vector.add(reflectedVelocity, trueSpinVelocity);
-			
-
-			obj.prevPosition = Vector.add(obj.position, Vector.mult(finalVelocity, this.dt));
-			obj.prevRotation = obj.rotation - balancedVel.angular * this.dt;
+			const distVec = Vector.sub(diff, closest);
+			const distMag = Vector.mag(distVec);
+			if(distMag < obj.radius) hits.push({
+				object: obj,
+				collider,
+				colliderInfo: info,
+				closest,
+				distVec,
+				distMag,
+			});
 		}
+		return hits;
+	}
+	private solveCollision(collisionData: CollisionData): void {
+		const { object, distVec, distMag } = collisionData;
+
+		// Push out of collider
+		const penetrationDepth = object.radius - distMag;
+		const penetrationVector = Vector.mult(distVec, penetrationDepth / distMag);
+		object.position = Vector.add(object.position, penetrationVector);
+
+		// Update velocities
+		const normalVec = Vector.from(Math.atan2(distVec.y, distVec.x));
+		const tangentVec = { x: -normalVec.y, y: normalVec.x };
+
+		const startVel = object.velocity;
+		let normalVel = Vector.project(startVel, normalVec);
+		normalVel = Vector.mult(normalVel, -this.restitutionCoefficient);
+		
+		let tangentVel = Vector.project(startVel, tangentVec);
+		const velocityChange = this.computeVelocityChange(Vector.mag(tangentVel), object);
+		tangentVel = Vector.addScalar(tangentVel, velocityChange.linear);
+
+		// console.log(Vector.mag(startVel));
+		// console.log(Vector.mag(normalVel));
+		// console.log(Vector.mag(tangentVel));
+
+		const finalLinearVel = Vector.mult(Vector.add(normalVel,tangentVel), this.dt);
+		const finalAngularVel = object.angularVelocity - velocityChange.angular * this.dt;
+		object.prevPosition = Vector.sub(object.position, finalLinearVel);
+		object.prevRotation = object.rotation - finalAngularVel;
+		// console.table({
+		// 	collider: collisionData.collider,
+		// 	...Vector.sub(object.position, object.prevPosition)
+		// })
+
+		
+		// const incomingAngle = Math.atan2(object.velocity.y, object.velocity.x);
+		// const reflectedAngle = normalAngle + normalAngle - incomingAngle;
+
+		// const speed = Vector.mag(object.velocity);
+		// const speedAlongTangent = speed * Math.sin(normalAngle - reflectedAngle);
+		// const balancedVel = this.getSpeedsAfterCollision(speedAlongTangent, object);
+		// const relAxisAngleX = reflectedAngle - normalAngle;
+		// const trueSpinVelocity = Vector.fromAngle(relAxisAngleX, balancedVel.linear);
+		// const reflectedVelocity = Vector.fromAngle(reflectedAngle, speed);
+		// const finalVelocity = Vector.add(reflectedVelocity, trueSpinVelocity);
+		
+
+		// object.prevPosition = Vector.add(object.position, Vector.mult(finalVelocity, this.dt));
+		// object.prevRotation = object.rotation - balancedVel.angular * this.dt;
 	}
 
 	private updateObjects() {
@@ -309,7 +345,11 @@ export class Physics {
 			this.solveRotation(obj);
 
 			this.constrainToView(obj);
-			this.solveColliders(obj);
+
+			const hitColliders = this.findCollisions(obj);
+			for(const collisionData of hitColliders) {
+				this.solveCollision(collisionData);
+			}
 
 			this.updateVelocities(obj);
 		}
