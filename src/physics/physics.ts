@@ -9,6 +9,7 @@ export class Vector {
 	static mult(one: Vector, scalar: number) { return { x: one.x * scalar, y: one.y * scalar } }
 	static div(one: Vector, scalar: number) { return { x: one.x / scalar, y: one.y / scalar } }
 	static mag(one: Vector) { return Math.hypot(one.x, one.y) }
+	static normalize(one: Vector) { return this.div(one, this.mag(one)) }
 	static dot(one: Vector, two: Vector) { return one.x * two.x + one.y * two.y }
 	static project(one: Vector, two: Vector) {
 		const dot = this.dot(one, two);
@@ -45,17 +46,18 @@ interface ColliderInfo {
 	x: number;
 	y: number;
 
-	width: number;
-	height: number;
-	halfWidth: number;
-	halfHeight: number;
-
-	bottom: number;
-	right: number;
+	w: number;
+	h: number;
+	hw: number;
+	hh: number;
 	
 	center: Vector;
 };
-class Collider {
+
+interface Collider {
+	getInfo(): ColliderInfo
+}
+class HTMLCollider implements Collider {
 	constructor(public element: HTMLElement) {}
 
 	getInfo(): ColliderInfo {
@@ -64,19 +66,45 @@ class Collider {
 			x: ElemRect.x,
 			y: ElemRect.y,
 
-			width: ElemRect.width,
-			height: ElemRect.height,
-			halfWidth: ElemRect.width / 2,
-			halfHeight: ElemRect.height / 2,
-
-			bottom: ElemRect.bottom,
-			right: ElemRect.right,
+			w: ElemRect.width,
+			h: ElemRect.height,
+			hw: ElemRect.width / 2,
+			hh: ElemRect.height / 2,
 
 			get center() {
 				return {
 					x: ElemRect.x + ElemRect.width / 2,
 					y: ElemRect.y + ElemRect.height / 2,
 				}
+			},
+		}
+	}
+}
+class RectCollider implements Collider {
+	constructor(
+		private rect: () => {
+			x: number;
+			y: number;
+			w: number;
+			h: number;
+		}
+	) {}
+
+	getInfo(): ColliderInfo {
+		const { x, y, w, h } = this.rect()
+
+		return {
+			x,
+			y,
+
+			w: w,
+			h: h,
+			hw: w / 2,
+			hh: h / 2,
+
+			center: {
+				x: x + w / 2,
+				y: y + h / 2,
 			},
 		}
 	}
@@ -110,7 +138,14 @@ export class Physics {
 	private minSpin = 0.00001;
 
 	constructor(colliderElems: HTMLElement[]) {
-		this.colliders = colliderElems.map(elem => new Collider(elem));
+		this.colliders = colliderElems.map(elem => new HTMLCollider(elem));
+		this.colliders.push(
+			// The four screen edges
+			new RectCollider(() => ({ x: -20, y: -20, w: innerWidth + 40, h: 20 })),
+			new RectCollider(() => ({ x: -20, y: innerHeight, w: innerWidth + 40, h: 20 })),
+			new RectCollider(() => ({ x: -20, y: -20, w: 20, h: innerHeight + 40 })),
+			new RectCollider(() => ({ x: innerWidth, y: -20, w: 20, h: innerHeight + 40 })),
+		);
 	}
 
 	public spawn(x: number, y: number): PhysicsObject {
@@ -142,10 +177,14 @@ export class Physics {
 
 		// DEBUG EDITS
 		obj.radius = 30;
-		obj.velocity = { x: -.3, y: -.3 };
-		obj.angularVelocity = 0;
-		obj.prevPosition = Vector.sub(position, obj.velocity);
+		obj.angularVelocity = .005;
+		
+		obj.velocity = new Vector(0, .1);
+		// const center = new Vector(innerWidth / 2, innerHeight / 2)
+		// obj.velocity = Vector.mult(Vector.normalize(Vector.sub(obj.position, center)), .1);
+		
 		obj.prevRotation = rotation - obj.angularVelocity;
+		obj.prevPosition = Vector.sub(position, obj.velocity);
 
 		this.objects.push(obj);
 
@@ -198,7 +237,6 @@ export class Physics {
 		// obj.velocity = Vector.sub(obj.position, obj.prevPosition);
 		// obj.angularVelocity = obj.rotation - obj.prevRotation;
 	}
-	// @ts-expect-error
 	private applyGravity(obj: PhysicsObject): void {
 		const force = Vector.mult(this.gravity, obj.mass);
 		this.applyForce(obj, force);
@@ -214,40 +252,6 @@ export class Physics {
 		const scalarPart = -speed * speed * surface * this.dragCoefficient;
 		const force = Vector.mult(dir, scalarPart);
 		this.applyForce(obj, force);
-	}
-
-	private constrainToView(obj: PhysicsObject): void {
-		const rightSide = obj.position.x + obj.radius > innerWidth;
-		const leftSide = obj.position.x - obj.radius < 0;
-		const bottomSide = obj.position.y + obj.radius > innerHeight;
-		const topSide = obj.position.y - obj.radius < 0;
-
-		if(rightSide) {
-			obj.position.x = innerWidth - obj.radius;
-		}
-		else if(leftSide) {
-			obj.position.x = obj.radius;
-		}
-		
-		if(bottomSide) {
-			obj.position.y = innerHeight - obj.radius;
-		}
-		else if(topSide) {
-			obj.position.y = obj.radius;
-		}
-
-		if(leftSide || rightSide) {
-			const velocityChange = this.computeVelocityChange(obj.velocity.y, obj);
-			obj.prevPosition.x = obj.position.x + obj.velocity.x * this.restitutionCoefficient * this.dt;
-			obj.prevPosition.y = obj.position.y - (obj.velocity.y + velocityChange.linear) * this.dt;
-			obj.prevRotation = obj.rotation - (obj.angularVelocity + velocityChange.angular) * this.dt;
-		}
-		else if (topSide || bottomSide) {
-			const velocityChange = this.computeVelocityChange(obj.velocity.x, obj);
-			obj.prevPosition.y = obj.position.y + obj.velocity.y * this.restitutionCoefficient * this.dt;
-			obj.prevPosition.x = obj.position.x - (obj.velocity.x + velocityChange.linear) * this.dt;
-			obj.prevRotation = obj.rotation - (obj.angularVelocity + velocityChange.angular) * this.dt;
-		}
 	}
 
 	private computeVelocityChange(speed: number, obj: PhysicsObject) {
@@ -267,8 +271,8 @@ export class Physics {
 			const info =  collider.getInfo();
 			const diff = Vector.sub(obj.position, info.center);
 			const closest = {
-				x: Math.max(Math.min(diff.x, info.halfWidth), -info.halfWidth),
-				y: Math.max(Math.min(diff.y, info.halfHeight), -info.halfHeight),
+				x: Math.max(Math.min(diff.x, info.hw), -info.hw),
+				y: Math.max(Math.min(diff.y, info.hh), -info.hh),
 			}
 
 			const distVec = Vector.sub(diff, closest);
@@ -338,13 +342,11 @@ export class Physics {
 		for(const obj of this.objects) {
 			if(obj.isDead) continue;
 			
-			// this.applyGravity(obj);
+			this.applyGravity(obj);
 			this.applyDrag(obj);
 
 			this.solvePosition(obj);
 			this.solveRotation(obj);
-
-			this.constrainToView(obj);
 
 			const hitColliders = this.findCollisions(obj);
 			for(const collisionData of hitColliders) {
