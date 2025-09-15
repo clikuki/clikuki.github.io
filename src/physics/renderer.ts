@@ -30,6 +30,7 @@ export class Renderer {
 				elem.style.left = `${obj.position.x - obj.radius}px`;
 				elem.style.top = `${obj.position.y - obj.radius}px`;
 				elem.style.rotate = `${Math.PI / 2 - obj.rotation}rad`;
+				elem.style.opacity = String(obj.health / obj.maxHealth);
 			}
 		}
 	}

@@ -22,12 +22,16 @@ export class Vector {
 }
 
 export class PhysicsObject {
+	
 	public isDead = false;
 	public netForces: Vector = { x: 0, y: 0 };
 	public netTorque = 0;
 	
 	public prevPosition: Vector;
-	public prevRotation: number
+	public prevRotation: number;
+
+	public readonly maxHealth = 1000;
+	public health = this.maxHealth;
 
 	constructor(
 		public position: Vector,
@@ -131,11 +135,14 @@ export class Physics {
 	private gravity = { x: 0, y: 10 };
 	private dragCoefficient = .01;
 	private restitutionCoefficient = .7;
-	private rollingCoefficient = .01;
+	private rollingCoefficient = .02;
 
 	// Stops jittering, set somewhere between 0.002 and 0.0001
 	private minSpeed = 0.0005;
 	private minSpin = 0.00001;
+
+	private speedThreshold = 20;
+	private damageFactor = 20;
 
 	constructor(colliderElems: HTMLElement[]) {
 		this.colliders = colliderElems.map(elem => new HTMLCollider(elem));
@@ -330,6 +337,17 @@ export class Physics {
 			}
 
 			this.updateVelocities(obj);
+
+			// Kill on low speed, heal on high speed
+			const speedSqr = obj.velocity.x*obj.velocity.x + obj.velocity.y*obj.velocity.y;
+			if(speedSqr < this.speedThreshold) {
+				const safeSpeed = Math.max(Math.sqrt(speedSqr), 1);
+				const damage = this.dt * this.damageFactor / safeSpeed;
+				obj.health = Math.max(0, obj.health - damage);
+				if(obj.health === 0) obj.isDead = true;
+			} else if(obj.health < obj.maxHealth) {
+				obj.health = Math.min(obj.maxHealth, obj.health + this.dt);
+			}
 		}
 	}
 
