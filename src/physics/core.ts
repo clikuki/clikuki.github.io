@@ -1,13 +1,33 @@
 import { Renderer } from "./renderer.js";
 import { Physics, PhysicsObject, Vector } from "./physics.js";
 
-function main() {
+function getObjectAtPosition(point: Vector, physics: Physics): PhysicsObject | null {
+	const objects = physics.objects;
+	const maxEdgeDist = 50;
+	const minAge = 10;
+
+	let closestObject: PhysicsObject | null = null;
+	let closestDistSqr = Infinity;
+	for(const [, obj] of objects) {
+		if(obj.age < minAge) continue;
+
+		const distSqr = Vector.magSqr(Vector.sub(obj.prevPosition, point));
+		const maxDistance = maxEdgeDist + obj.radius;
+		if(distSqr < maxDistance*maxDistance && distSqr < closestDistSqr) {
+			closestObject = obj;
+			closestDistSqr = distSqr;
+		}
+	}
+
+	return closestObject;
+}
+
+function main(): void {
 	const clickerEl = document.querySelector("img.cookie") as HTMLImageElement;
 	const bitContainerEl = document.querySelector(".cookie-bits") as HTMLElement;
 	const collidableElems = Array.from(document.querySelectorAll("[data-collidable]")) as HTMLElement[];
 	
 	let draggedObject: PhysicsObject | null = null;
-	const msWaitBeforeDrag = 400;
 	const mousePos = new Vector(0,0);
 
 	clickerEl.classList.add("js-enabled")
@@ -22,16 +42,10 @@ function main() {
 	);
 
 	clickerEl.addEventListener("click", (ev) => {
-		const elem = renderer.add(physics.spawn(
+		renderer.add(physics.spawn(
 			ev.x,
 			ev.y + document.documentElement.scrollTop,
 		))
-		
-		elem.style.pointerEvents = "none";
-		setTimeout(
-			() => elem.style.pointerEvents = "",
-			msWaitBeforeDrag,
-		);
 	})
 
 	window.addEventListener("mousemove", (ev) => {
@@ -40,7 +54,7 @@ function main() {
 	})
 	window.addEventListener("mousedown", (ev) => {
 		if(ev.target instanceof HTMLElement) {
-			draggedObject = physics.objects.get(ev.target.id) ?? null;
+			draggedObject = getObjectAtPosition(mousePos, physics);
 			if(draggedObject) draggedObject.isBeingDragged = true;
 		}
 	})

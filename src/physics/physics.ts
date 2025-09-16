@@ -9,11 +9,12 @@ export class Vector {
 	static mult(one: Vector, scalar: number) { return { x: one.x * scalar, y: one.y * scalar } }
 	static div(one: Vector, scalar: number) { return { x: one.x / scalar, y: one.y / scalar } }
 	static mag(one: Vector) { return Math.hypot(one.x, one.y) }
+	static magSqr(one: Vector) { return one.x*one.x + one.y*one.y }
 	static normalize(one: Vector) { return this.div(one, this.mag(one)) }
 	static dot(one: Vector, two: Vector) { return one.x * two.x + one.y * two.y }
 	static project(one: Vector, two: Vector) {
 		const dot = this.dot(one, two);
-		const magSqr = two.x*two.x + two.y*two.y;
+		const magSqr = this.magSqr(two);
 		return {
 			x: dot / magSqr * two.x,
 			y: dot / magSqr * two.y,
@@ -32,6 +33,7 @@ export class PhysicsObject {
 	public readonly maxHealth = 1000;
 	public health = this.maxHealth;
 	public isBeingDragged = false;
+	public age = 0;
 
 	constructor(
 		public id: string,
@@ -356,12 +358,13 @@ export class Physics {
 
 			this.updateVelocities(obj);
 			this.updateHealth(obj);
+			obj.age += this.dt;
 		}
 	}
 
 	private updateHealth(obj: PhysicsObject) {
 		// Kill on low speed, heal on high speed
-		const speedSqr = obj.velocity.x*obj.velocity.x + obj.velocity.y*obj.velocity.y;
+		const speedSqr = Vector.magSqr(obj.velocity);
 		if(!obj.isBeingDragged && speedSqr < this.speedThreshold) {
 			const safeSpeed = Math.max(Math.sqrt(speedSqr), 1);
 			const damage = this.dt * this.damageFactor / safeSpeed;
