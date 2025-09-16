@@ -1,5 +1,5 @@
 import { Renderer } from "./renderer.js";
-import { Physics } from "./physics.js";
+import { Physics, PhysicsObject, Vector } from "./physics.js";
 
 function main() {
 	const msWaitBeforeDrag = 400;
@@ -16,10 +16,11 @@ function main() {
 		bitContainerEl,
 	);
 
-	clickerEl.addEventListener("click", (e) => {
+	let draggedObject: PhysicsObject | null = null;
+	clickerEl.addEventListener("click", (ev) => {
 		const elem = renderer.add(physics.spawn(
-			e.x,
-			e.y + document.documentElement.scrollTop,
+			ev.x,
+			ev.y + document.documentElement.scrollTop,
 		))
 		
 		elem.style.pointerEvents = "none";
@@ -27,6 +28,24 @@ function main() {
 			() => elem.style.pointerEvents = "",
 			msWaitBeforeDrag,
 		);
+	})
+
+	const mousePos = new Vector(0,0);
+	window.addEventListener("mousemove", (ev) => {
+		mousePos.x = ev.x;
+		mousePos.y = ev.y + document.documentElement.scrollTop;
+	})
+	window.addEventListener("mousedown", (ev) => {
+		if(ev.target instanceof HTMLElement && ev.target.className === renderer.elementClass) {
+			draggedObject = physics.objects.get(ev.target.id) ?? null;
+			if(draggedObject) draggedObject.isBeingDragged = true;
+		}
+	})
+	window.addEventListener("mouseup", () => {
+		if(draggedObject) {
+			draggedObject.isBeingDragged = true;
+			draggedObject = null;
+		}
 	})
 
 	try {

@@ -22,7 +22,6 @@ export class Vector {
 }
 
 export class PhysicsObject {
-	
 	public isDead = false;
 	public netForces: Vector = { x: 0, y: 0 };
 	public netTorque = 0;
@@ -32,8 +31,10 @@ export class PhysicsObject {
 
 	public readonly maxHealth = 1000;
 	public health = this.maxHealth;
+	public isBeingDragged = false;
 
 	constructor(
+		public id: string,
 		public position: Vector,
 		public velocity: Vector,
 		public rotation: number,
@@ -123,8 +124,13 @@ interface CollisionData {
 	distMag: number;
 }
 
+const generateID = (() => {
+	let cnt = 0;
+	return (() => String(cnt++))
+})()
+
 export class Physics {
-	public objects: PhysicsObject[] = []
+	public objects = new Map<string, PhysicsObject>();
 	public colliders: Collider[];
 	public t = 0;
 	private dt = 0.01;
@@ -174,6 +180,7 @@ export class Physics {
 
 		const position = { x, y };
 		const obj = new PhysicsObject(
+			generateID(),
 			position,
 			velocity,
 			rotation,
@@ -193,7 +200,7 @@ export class Physics {
 		// obj.prevRotation = rotation - obj.angularVelocity;
 		// obj.prevPosition = Vector.sub(position, obj.velocity);
 
-		this.objects.push(obj);
+		this.objects.set(obj.id, obj);
 
 		return obj;
 	}
@@ -302,6 +309,13 @@ export class Physics {
 		const penetrationVector = Vector.mult(distVec, penetrationDepth / distMag);
 		object.position = Vector.add(object.position, penetrationVector);
 
+		// Kill velocities when being dragged
+		if(object.isBeingDragged) {
+			object.prevPosition = object.position;
+			object.prevRotation = object.rotation;
+			return;
+		}
+
 		// Update velocities
 		const normalVec = Vector.from(Math.atan2(distVec.y, distVec.x));
 		const tangentVec = { x: -normalVec.y, y: normalVec.x };
@@ -322,7 +336,7 @@ export class Physics {
 	}
 
 	private updateObjects() {
-		for(const obj of this.objects) {
+		for(const [, obj] of this.objects) {
 			if(obj.isDead) continue;
 			
 			this.applyGravity(obj);
@@ -352,19 +366,8 @@ export class Physics {
 	}
 
 	private removeDead(): void {
-		let i = 0;
-		let cnt = this.objects.length;
-		let curr: PhysicsObject;
-		let tmp: PhysicsObject;
-		while(i < cnt) {
-			curr = this.objects[i];
-			if(!curr.isDead) ++i;
-			else {
-				tmp = this.objects[cnt - 1];
-				this.objects[cnt - 1] = curr;
-				this.objects[i] = tmp;
-				this.objects.length = --cnt;
-			}
+		for(const [id, obj] of this.objects) {
+			if(obj.isDead) this.objects.delete(id);
 		}
 	}
 	
