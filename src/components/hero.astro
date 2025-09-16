@@ -12,15 +12,15 @@ import { content } from "../content";
 	</h1>
 	
 	<div class="shortcuts">
-		<a href="#projects">My Projects</a><br/>
-		<a href="#about">About Me</a>
+		<a data-collidable="true" href="#projects">My Projects</a><br/>
+		<a data-collidable="true" href="#about">About Me</a>
 	</div>
 	
 	<img class="cookie" src="pixel_cookie.png" alt="A big cookie?" draggable="false">
 	
 	<ul class="highlights">
 		{content.projects.map(proj => {
-			if(proj.isHighlight) return (<li>
+			if(proj.isHighlight) return (<li data-collidable>
 				<ProjectItem
 					title={proj.title}
 					thumbnailSrc={proj.thumbnailSrc}
@@ -158,6 +158,8 @@ import { content } from "../content";
 		position: absolute;
 		width: 1rem;
 		aspect-ratio: 1;
+		user-select: none;
+		pointer-events: none;
 	}
 	
 	.highlights {

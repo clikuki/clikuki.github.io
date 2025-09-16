@@ -48,10 +48,14 @@ function main(): void {
 	window.addEventListener("mousedown", (ev) => {
 		if(ev.target instanceof HTMLElement) {
 			draggedObject = getObjectAtPosition(mousePos, physics);
-			if(draggedObject) draggedObject.isBeingDragged = true;
+			if(draggedObject) {
+				draggedObject.isBeingDragged = true;
+				document.body.style.userSelect = "none";
+			}
 		}
 	})
 	window.addEventListener("mouseup", (ev) => {
+		document.body.style.removeProperty("user-select");
 		if(draggedObject) {
 			draggedObject.isBeingDragged = false;
 			draggedObject = null;
