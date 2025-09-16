@@ -366,17 +366,20 @@ export class Physics {
 			}
 
 			this.updateVelocities(obj);
+			this.updateHealth(obj);
+		}
+	}
 
-			// Kill on low speed, heal on high speed
-			const speedSqr = obj.velocity.x*obj.velocity.x + obj.velocity.y*obj.velocity.y;
-			if(speedSqr < this.speedThreshold) {
-				const safeSpeed = Math.max(Math.sqrt(speedSqr), 1);
-				const damage = this.dt * this.damageFactor / safeSpeed;
-				obj.health = Math.max(0, obj.health - damage);
-				if(obj.health === 0) obj.isDead = true;
-			} else if(obj.health < obj.maxHealth) {
-				obj.health = Math.min(obj.maxHealth, obj.health + this.dt);
-			}
+	private updateHealth(obj: PhysicsObject) {
+		// Kill on low speed, heal on high speed
+		const speedSqr = obj.velocity.x*obj.velocity.x + obj.velocity.y*obj.velocity.y;
+		if(!obj.isBeingDragged && speedSqr < this.speedThreshold) {
+			const safeSpeed = Math.max(Math.sqrt(speedSqr), 1);
+			const damage = this.dt * this.damageFactor / safeSpeed;
+			obj.health = Math.max(0, obj.health - damage);
+			if(obj.health === 0) obj.isDead = true;
+		} else if(obj.health < obj.maxHealth) {
+			obj.health = Math.min(obj.maxHealth, obj.health + this.dt * speedSqr);
 		}
 	}
 
