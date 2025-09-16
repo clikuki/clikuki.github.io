@@ -152,7 +152,7 @@ export class Physics {
 
 	constructor(
 		colliderElems: HTMLElement[],
-		public attractors: [predicate: (obj: PhysicsObject) => boolean, point: () => Vector][] = []
+		public mouse: () => Vector,
 	){
 		this.colliders = colliderElems.map(elem => new HTMLCollider(elem));
 		this.colliders.push(
@@ -270,15 +270,11 @@ export class Physics {
 		const force = Vector.mult(dir, scalarPart);
 		this.applyForce(obj, force);
 	}
-	private applyAttractors(obj: PhysicsObject) {
-		for(const [pred, point] of this.attractors) {
-			if(!pred(obj)) continue;
-
-			const nearNextPos = Vector.add(obj.position, obj.velocity);
-			const diff = Vector.sub(point(), nearNextPos);
-			const force = Vector.mult(diff, obj.mass);
-			this.applyForce(obj, force);
-		}
+	private applyMouseAttractor(obj: PhysicsObject) {
+		const nearNextPos = Vector.add(obj.position, obj.velocity);
+		const diff = Vector.sub(this.mouse(), nearNextPos);
+		const force = Vector.mult(diff, obj.mass);
+		this.applyForce(obj, force);
 	}
 
 	private computeCollisionVelocity(speed: number, obj: PhysicsObject) {
@@ -323,13 +319,6 @@ export class Physics {
 		const penetrationVector = Vector.mult(distVec, penetrationDepth / distMag);
 		object.position = Vector.add(object.position, penetrationVector);
 
-		// Kill velocities when being dragged
-		if(object.isBeingDragged) {
-			object.prevPosition = object.position;
-			object.prevRotation = object.rotation;
-			return;
-		}
-
 		// Update velocities
 		const normalVec = Vector.from(Math.atan2(distVec.y, distVec.x));
 		const tangentVec = { x: -normalVec.y, y: normalVec.x };
@@ -355,7 +344,7 @@ export class Physics {
 			
 			this.applyGravity(obj);
 			this.applyDrag(obj);
-			this.applyAttractors(obj);
+			if(obj.isBeingDragged) this.applyMouseAttractor(obj);
 
 			this.solvePosition(obj);
 			this.solveRotation(obj);

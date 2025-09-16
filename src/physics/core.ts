@@ -14,10 +14,7 @@ function main() {
 
 	const physics = new Physics(
 		collidableElems,
-		[[
-			(obj) => obj.isBeingDragged,
-			() => ({...mousePos}),
-		]]
+		() => Vector.copy(mousePos)
 	);
 	const renderer = new Renderer(
 		physics.objects,
