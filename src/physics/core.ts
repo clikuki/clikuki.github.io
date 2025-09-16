@@ -85,8 +85,8 @@ function main(): void {
 			// 	}
 			// }
 
-			physics.update(t);
-			renderer.update();
+			const alpha = physics.update(t);
+			renderer.update(alpha);
 			requestAnimationFrame(updateLoop);
 		})
 	}
