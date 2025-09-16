@@ -2,21 +2,28 @@ import { Renderer } from "./renderer.js";
 import { Physics, PhysicsObject, Vector } from "./physics.js";
 
 function main() {
-	const msWaitBeforeDrag = 400;
-
 	const clickerEl = document.querySelector("img.cookie") as HTMLImageElement;
 	const bitContainerEl = document.querySelector(".cookie-bits") as HTMLElement;
 	const collidableElems = Array.from(document.querySelectorAll("[data-collidable]")) as HTMLElement[];
+	
+	let draggedObject: PhysicsObject | null = null;
+	const msWaitBeforeDrag = 400;
+	const mousePos = new Vector(0,0);
 
 	clickerEl.classList.add("js-enabled")
 
-	const physics = new Physics(collidableElems);
+	const physics = new Physics(
+		collidableElems,
+		[[
+			(obj) => obj.isBeingDragged,
+			() => ({...mousePos}),
+		]]
+	);
 	const renderer = new Renderer(
 		physics.objects,
 		bitContainerEl,
 	);
 
-	let draggedObject: PhysicsObject | null = null;
 	clickerEl.addEventListener("click", (ev) => {
 		const elem = renderer.add(physics.spawn(
 			ev.x,
@@ -30,20 +37,19 @@ function main() {
 		);
 	})
 
-	const mousePos = new Vector(0,0);
 	window.addEventListener("mousemove", (ev) => {
 		mousePos.x = ev.x;
 		mousePos.y = ev.y + document.documentElement.scrollTop;
 	})
 	window.addEventListener("mousedown", (ev) => {
-		if(ev.target instanceof HTMLElement && ev.target.className === renderer.elementClass) {
+		if(ev.target instanceof HTMLElement) {
 			draggedObject = physics.objects.get(ev.target.id) ?? null;
 			if(draggedObject) draggedObject.isBeingDragged = true;
 		}
 	})
 	window.addEventListener("mouseup", () => {
 		if(draggedObject) {
-			draggedObject.isBeingDragged = true;
+			draggedObject.isBeingDragged = false;
 			draggedObject = null;
 		}
 	})

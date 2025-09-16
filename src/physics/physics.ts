@@ -150,7 +150,10 @@ export class Physics {
 	private speedThreshold = 20;
 	private damageFactor = 20;
 
-	constructor(colliderElems: HTMLElement[]) {
+	constructor(
+		colliderElems: HTMLElement[],
+		public attractors: [predicate: (obj: PhysicsObject) => boolean, point: () => Vector][] = []
+	){
 		this.colliders = colliderElems.map(elem => new HTMLCollider(elem));
 		this.colliders.push(
 			// The four screen edges
@@ -250,6 +253,7 @@ export class Physics {
 		obj.velocity = Vector.div(Vector.sub(obj.position, obj.prevPosition), this.dt);
 		obj.angularVelocity = (obj.rotation - obj.prevRotation) / this.dt;
 	}
+	
 	private applyGravity(obj: PhysicsObject): void {
 		const force = Vector.mult(this.gravity, obj.mass);
 		this.applyForce(obj, force);
@@ -265,6 +269,16 @@ export class Physics {
 		const scalarPart = -speed * speed * surface * this.dragCoefficient;
 		const force = Vector.mult(dir, scalarPart);
 		this.applyForce(obj, force);
+	}
+	private applyAttractors(obj: PhysicsObject) {
+		for(const [pred, point] of this.attractors) {
+			if(!pred(obj)) continue;
+
+			const nearNextPos = Vector.add(obj.position, obj.velocity);
+			const diff = Vector.sub(point(), nearNextPos);
+			const force = Vector.mult(diff, obj.mass);
+			this.applyForce(obj, force);
+		}
 	}
 
 	private computeCollisionVelocity(speed: number, obj: PhysicsObject) {
@@ -341,6 +355,7 @@ export class Physics {
 			
 			this.applyGravity(obj);
 			this.applyDrag(obj);
+			this.applyAttractors(obj);
 
 			this.solvePosition(obj);
 			this.solveRotation(obj);
