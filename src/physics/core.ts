@@ -41,13 +41,6 @@ function main(): void {
 		bitContainerEl,
 	);
 
-	clickerEl.addEventListener("click", (ev) => {
-		renderer.add(physics.spawn(
-			ev.x,
-			ev.y + document.documentElement.scrollTop,
-		))
-	})
-
 	window.addEventListener("mousemove", (ev) => {
 		mousePos.x = ev.x;
 		mousePos.y = ev.y + document.documentElement.scrollTop;
@@ -58,10 +51,16 @@ function main(): void {
 			if(draggedObject) draggedObject.isBeingDragged = true;
 		}
 	})
-	window.addEventListener("mouseup", () => {
+	window.addEventListener("mouseup", (ev) => {
 		if(draggedObject) {
 			draggedObject.isBeingDragged = false;
 			draggedObject = null;
+		}
+		else if(ev.target === clickerEl) {
+			renderer.add(physics.spawn(
+				ev.x,
+				ev.y + document.documentElement.scrollTop,
+			))
 		}
 	})
 
