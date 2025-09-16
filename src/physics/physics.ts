@@ -342,9 +342,9 @@ export class Physics {
 		for(const [, obj] of this.objects) {
 			if(obj.isDead) continue;
 			
-			this.applyGravity(obj);
 			this.applyDrag(obj);
 			if(obj.isBeingDragged) this.applyMouseAttractor(obj);
+			else this.applyGravity(obj);
 
 			this.solvePosition(obj);
 			this.solveRotation(obj);
