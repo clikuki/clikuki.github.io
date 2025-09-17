@@ -1,5 +1,4 @@
 ---
-import { colors, backgroundPatterns } from "../styleConstants";
 import { content } from "../content";
 ---
 
@@ -22,7 +21,7 @@ import { content } from "../content";
 	</div>
 </sect>
 
-<style define:vars={{"bg-pattern": `url("${backgroundPatterns.circuit(colors.white, 1)}")`}}>
+<style>
 	section {
 		padding: 1rem;
 		background-color: var(--darker);
@@ -34,7 +33,7 @@ import { content } from "../content";
 				color-mix(in oklab, var(--dark) 90%, transparent) 70%,
 				color-mix(in oklab, var(--darker) 70%, transparent)
 			),
-			var(--bg-pattern);
+			url("circuit.svg");
 		background-position: 1rem;
 	}
 

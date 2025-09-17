@@ -1,6 +1,5 @@
 ---
 import ProjectItem from "./projectItem.astro"
-import { colors, backgroundPatterns } from "../styleConstants";
 import { content } from "../content";
 ---
 
@@ -35,16 +34,16 @@ import { content } from "../content";
 
 <script src="../physics/core.ts"></script>
 
-<style define:vars={{"bg-pattern": `url("${backgroundPatterns.whirl(colors.darker, .3)}")`}}>
+<style>
 	section {
 		height: 100vh;
 		padding: 1rem;
 		display: grid;
 		grid-template-areas:
-			"header cookie display"
-			"shortcuts cookie display";
-		grid-template-rows: max-content 1fr;
-		grid-template-columns: max-content 1fr 1fr;
+			"header"
+			"shortcuts"
+			"display";
+		grid-template-rows: max-content 1fr 2fr;
 		column-gap: 0.5rem;
 
 		background-image:
@@ -54,7 +53,7 @@ import { content } from "../content";
 				transparent,
 				color-mix(in oklab, var(--light) 70%, transparent)
 			),
-			var(--bg-pattern);
+			url("motion.svg");
 	}
 
 	h1 {

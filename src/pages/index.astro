@@ -2,7 +2,6 @@
 import Hero from "../components/hero.astro";
 import ProjectList from "../components/projectList.astro";
 import AboutMe from "../components/aboutMe.astro";
-import { colors } from "../styleConstants.ts";
 ---
 
 <!DOCTYPE html>
@@ -25,8 +24,13 @@ import { colors } from "../styleConstants.ts";
 </body>
 </html>
 
-<style define:vars={colors}>
+<style>
 	:root {
+		--white: #F3E9DC;
+		--darker: #C75D2C;
+		--dark: #D96F32;
+		--light: #F8B259;
+
 		scrollbar-color: var(--darker) var(--light);
 		scrollbar-width: thin;
   	scroll-behavior: smooth;
