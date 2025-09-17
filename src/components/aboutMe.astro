@@ -5,7 +5,6 @@ import { content } from "../content";
 <section>
 	<h2 id="about">About Me</h2>
 	<div class="body">
-		<img class="portrait" src="cookie.jpg" alt="A cookie is me!">
 		<div class="content">
 			<p class="description">
 				Hi, I'm Clikuki, and this place is where I'll put all the stuff I make!
@@ -109,21 +108,5 @@ import { content } from "../content";
 	}
 	.socials a:hover span::after {
 		width: 100%;
-	}
-
-	.portrait {
-		text-align: center;
-		width: 15rem;
-		border-radius: .7rem;
-		box-shadow:
-			 .4rem .4rem var(--light),
-			-.4rem .4rem var(--light);
-		transition: translate 500ms, box-shadow 500ms;
-	}
-	.portrait:hover {
-		translate: 0 -1rem;
-		box-shadow:
-			 .4rem 1rem var(--light),
-			-.4rem 1rem var(--light);
 	}
 </style>
