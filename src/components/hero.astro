@@ -39,6 +39,7 @@ import { content } from "../content";
 	section {
 		height: 100vh;
 		padding: 1rem;
+		position: relative;
 		display: grid;
 		grid-template-areas:
 			"header"
@@ -48,14 +49,32 @@ import { content } from "../content";
 		column-gap: 0.5rem;
 
 		background-color: var(--white);
+		background-image: url("motion.svg");
+		background-repeat: repeat;
+		animation: scrollBG 15s linear infinite;
+		isolation: isolate;
+	}
+	section::before {
+		content: "";
+		position: absolute;
+		inset: 0;
 		background-image:
 			linear-gradient(
 				to bottom,
 				color-mix(in oklab, var(--white) 90%, transparent),
 				transparent,
 				color-mix(in oklab, var(--light) 70%, transparent)
-			),
-			url("motion.svg");
+			);
+		z-index: -1;
+	}
+
+	@keyframes scrollBG {
+		from {
+			background-position: 0 0;
+		}
+		to {
+			background-position: 120px -120px;
+		}
 	}
 
 	h1 {
