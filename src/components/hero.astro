@@ -19,6 +19,7 @@ import { content } from "../content";
 	
 	<ul class="highlights">
 		{content.projects.map(proj => {
+			// TODO: move data-collidable to project item itself
 			if(proj.isHighlight) return (<li data-collidable>
 				<ProjectItem
 					title={proj.title}
@@ -27,7 +28,7 @@ import { content } from "../content";
 				/>
 			</li>)
 		})}
-	</u>
+	</ul>
 	
 	<div class="cookie-bits"></div>
 </section>
@@ -43,7 +44,7 @@ import { content } from "../content";
 			"header"
 			"shortcuts"
 			"display";
-		grid-template-rows: max-content 1fr 2fr;
+		grid-template-rows: max-content min-content 2fr;
 		column-gap: 0.5rem;
 
 		background-color: var(--white);
@@ -97,7 +98,7 @@ import { content } from "../content";
 		flex-wrap: wrap;
 		justify-content: center;
 		margin-top: 1.5rem;
-		gap: 1rem .2rem;
+		gap: 1rem 0;
 		height: min-content;
 	}
 	.shortcuts a {
@@ -108,13 +109,9 @@ import { content } from "../content";
 		background-color: var(--light);
 		box-shadow: .3rem .3rem var(--darker);
 		font-size: 1.3rem;
-		margin: 0;
+		margin: 0 .5rem;
 		padding: 1rem 2rem;
-		transition: translate 500ms;
 	}
-	/* .shortcuts a:hover {
-		translate: 1rem 0;
-	} */
 	
 	.cookie {
 		display: none;
@@ -123,7 +120,7 @@ import { content } from "../content";
 		justify-self: center;
 		position: relative;
 		width: 100%;
-		max-width: 26rem;
+		max-width: 600px;
 		aspect-ratio: 1;
 		image-rendering: crisp-edges;
 		border-radius: 33%;
@@ -171,27 +168,80 @@ import { content } from "../content";
 	}
 	
 	.highlights {
-		--size: 9.5rem;
+		--ideal: 100%;
+		position: relative;
 		list-style: none;
 		grid-area: display;
 		display: grid;
-		grid-template-columns: repeat(2, 1fr);
-		grid-template-rows: repeat(2, 1fr);
-		align-items: flex-end;
+		grid-template-rows: 1fr 1fr;
+		grid-template-columns: 1fr 1fr;
 		gap: 1rem;
 		padding: 0;
 		margin: 0;
 	}
-	.highlights > :global(:nth-child(1)) {
-		grid-column: 1/3;
-		justify-self: center;
+	.highlights > li {
+		--size: clamp(9.5rem, var(--ideal), 15rem);
+		display: flex;
+		justify-content: center;
+		height: min-content;
 	}
-	.highlights > :global(:nth-child(2)) {
+	.highlights > li:global(:nth-child(1)) {
+		--ideal: 50%;
+		grid-column: 1 / 3;
+		align-self: end;
+		justify-content: center;
+	}
+	.highlights > li:global(:nth-child(2)) {
 		justify-self: end;
-		align-self: start;
+		justify-content: flex-end;
 	}
-	.highlights > :global(:nth-child(3)) {
-		justify-self: start;
-		align-self: start;
+	.highlights > li:global(:nth-child(3)) {
+		justify-content: start;
+	}
+
+	@media screen and (min-width: 500px) {
+		h1 {
+			width: max-content;
+		}
+	}
+
+	@media screen and (min-width: 1000px) {
+		section {
+			grid-template-areas:
+				"header cookie display"
+				"shortcuts cookie display";
+			grid-template-rows: max-content 1fr;
+			grid-template-columns: max-content 1fr 1fr;
+		}
+
+		.shortcuts {
+			grid-area: shortcuts;
+			margin-top: 1.5rem;			
+			display: block;
+		}
+		.shortcuts a {
+			margin: 1rem 0 0 2rem;
+			transition: translate 500ms;
+		}
+		.shortcuts a:hover {
+			translate: 1rem 0;
+		}
+		
+		.cookie {
+			display: block;
+		}
+	}
+
+	@media screen and (min-width: 1000px) and (max-width: 1500px) {
+		.highlights {
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+		}
+		.highlights > li:global(:nth-child(1)) {
+			--ideal: 100%;
+			align-self: auto;
+		}
 	}
 </style>
