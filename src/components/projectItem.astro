@@ -3,12 +3,14 @@ interface Props {
 	title: string;
 	projectSrc: string;
 	thumbnailSrc: string;
+	collidable: boolean;
 }
 
-const { title, projectSrc, thumbnailSrc } = Astro.props;
+const { title, projectSrc, thumbnailSrc, collidable } = Astro.props;
 ---
 
-<a href={projectSrc}>
+<!-- Seems undefined attributes get stripped, which is desired behavior -->
+<a href={projectSrc} data-collidable={collidable || undefined}>
 	<img src={thumbnailSrc} alt={title}>
 	<span>{title}</span>
 </a>

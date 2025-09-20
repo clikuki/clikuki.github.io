@@ -12,6 +12,7 @@ import { content } from "../content";
 					title={proj.title}
 					thumbnailSrc={proj.thumbnailSrc}
 					projectSrc={proj.projectSrc}
+					collidable={false}
 				/>
 			</li>
 		))}
@@ -44,7 +45,7 @@ import { content } from "../content";
 	}
 
 	ul {
-		--size: 80vw;
+		--size: min(80vw, 20rem);
 		list-style: none;
 		display: flex;
 		flex-wrap: wrap;

@@ -12,19 +12,19 @@ import { content } from "../content";
 	
 	<div class="shortcuts">
 		<a data-collidable="true" href="#projects">My Projects</a><br/>
-		<a data-collidable="true" href="#about">About Me</a>
+		<a data-collidable="true" href="https://github.com/clikuki/">My GitHub</a>
 	</div>
 	
 	<img class="cookie" src="pixel_cookie.png" alt="A big cookie?" draggable="false">
 	
 	<ul class="highlights">
 		{content.projects.map(proj => {
-			// TODO: move data-collidable to project item itself
-			if(proj.isHighlight) return (<li data-collidable>
+			if(proj.isHighlight) return (<li>
 				<ProjectItem
 					title={proj.title}
 					thumbnailSrc={proj.thumbnailSrc}
 					projectSrc={proj.projectSrc}
+					collidable={true}
 				/>
 			</li>)
 		})}
