@@ -128,7 +128,7 @@ export class Physics {
 	private minSpeed = 0.0005;
 	private minSpin = 0.00001;
 
-	private speedThreshold = 20;
+	private speedThreshold = 1;
 	private damageFactor = 20;
 
 	constructor(
@@ -336,15 +336,16 @@ export class Physics {
 	}
 
 	private updateHealth(obj: PhysicsObject) {
-		// Kill on low speed, heal on high speed
-		const speedSqr = Vector.magSqr(obj.velocity);
-		if(!obj.isBeingDragged && speedSqr < this.speedThreshold) {
-			const safeSpeed = Math.max(Math.sqrt(speedSqr), 1);
+		// Kill on low y speed, heal on high speed
+		const speed = obj.velocity.y;
+		if(!obj.isBeingDragged && speed < this.speedThreshold) {
+			console.log(speed);
+			const safeSpeed = Math.max(Math.abs(speed), 1);
 			const damage = this.dt * this.damageFactor / safeSpeed;
 			obj.health = Math.max(0, obj.health - damage);
 			if(obj.health === 0) obj.isDead = true;
 		} else if(obj.health < obj.maxHealth) {
-			obj.health = Math.min(obj.maxHealth, obj.health + this.dt * speedSqr);
+			obj.health = Math.min(obj.maxHealth, obj.health + this.dt * speed);
 		}
 	}
 
