@@ -30,13 +30,14 @@ export class PhysicsObject {
 	public prevPosition: Vector;
 	public prevRotation: number;
 
+	public readonly id = generateID();
 	public readonly maxHealth = 1000;
 	public health = this.maxHealth;
 	public isBeingDragged = false;
 	public age = 0;
+	
 
 	constructor(
-		public id: string,
 		public position: Vector,
 		public velocity: Vector,
 		public rotation: number,
@@ -112,10 +113,11 @@ export class Physics {
 	public objects = new Map<string, PhysicsObject>();
 	// public colliders: Collider[];
 	public t = 0;
-	private dt = 0.01;
+	private dt = 0.05;
 	private dtSqr = this.dt * this.dt;
 	private currentTime = performance.now();
 	private accumulator = 0;
+	private halfPI = Math.PI / 2;
 	
 	private gravity = { x: 0, y: 10 };
 	private dragCoefficient = .01;
@@ -148,20 +150,15 @@ export class Physics {
 		const radius = Math.random() * (maxRadius - minRadius) + minRadius;
 		const mass = Math.PI * radius * radius;
 
-		const velLength = Math.random() + .1;
-		const velAngle = Math.random() * -Math.PI;
-		const velocity = {
-			x: velLength * Math.cos(velAngle),
-			y: velLength * Math.sin(velAngle),
-		}
+		const velLength = (Math.random() + 50) * this.dt;
+		const velAngle = Math.random()*-this.halfPI*.7 - Math.round(Math.random())*this.halfPI;
+		const velocity = Vector.from(velAngle, velLength);
 
-		const rotation = Math.random() * 2 * Math.PI - Math.PI;
-		const maxAngularVelocity = .05;
-		const angularVelocity = Math.random() * maxAngularVelocity * 2 - maxAngularVelocity;
+		const rotation = Math.random() * 2*Math.PI - Math.PI;
+		const angularVelocity = (Math.random() * 2 - 1) * this.dt;
 
 		const position = { x, y };
 		const obj = new PhysicsObject(
-			generateID(),
 			position,
 			velocity,
 			rotation,
