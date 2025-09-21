@@ -91,6 +91,13 @@ function main(): void {
 				ev.x,
 				ev.y + document.documentElement.scrollTop,
 			))
+
+			// Apply shake animation
+			clickerEl.classList.toggle("shake");
+			clickerEl.offsetHeight;
+			requestAnimationFrame(() => {
+				clickerEl.classList.add("shake");
+			})
 		}
 	})
 

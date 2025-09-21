@@ -147,7 +147,7 @@ import { content } from "../content";
 	}
 	.cookie.js-enabled {
 		cursor: pointer;
-		transition: scale 500ms;
+		transition: scale 500ms, scale 100ms;
 	}
 	.cookie.js-enabled:hover {
 		scale: 1.03;
@@ -156,20 +156,14 @@ import { content } from "../content";
 		animation: shake 300ms ease-in-out;
 	}
 	@keyframes shake {
-		0% {
-			rotate: 0deg;
+		from {
+			scale: 1;
 		}
-		20% {
-			rotate: 3deg;
+		50% {
+			scale: 1.04;
 		}
-		70% {
-			rotate: -3deg;
-		}
-		90% {
-			rotate: 1deg;
-		}
-		100% {
-			rotate: 0deg;
+		to {
+			scale: 1.02;
 		}
 	}
 
