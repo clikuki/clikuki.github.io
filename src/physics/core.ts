@@ -1,5 +1,31 @@
 import { Renderer } from "./renderer.js";
 import { Physics, PhysicsObject, Vector } from "./physics.js";
+import type { Collider, ColliderInfo } from "./physics.js";
+
+class HTMLCollider implements Collider {
+	constructor(public element: HTMLElement) {}
+
+	getInfo(): ColliderInfo {
+		const ElemRect = this.element.getBoundingClientRect();
+		ElemRect.y += document.documentElement.scrollTop;
+		return {
+			x: ElemRect.x,
+			y: ElemRect.y,
+
+			w: ElemRect.width,
+			h: ElemRect.height,
+			hw: ElemRect.width / 2,
+			hh: ElemRect.height / 2,
+
+			get center() {
+				return {
+					x: ElemRect.x + ElemRect.width / 2,
+					y: ElemRect.y + ElemRect.height / 2,
+				}
+			},
+		}
+	}
+}
 
 function getObjectAtPosition(point: Vector, physics: Physics): PhysicsObject | null {
 	const objects = physics.objects;
@@ -33,7 +59,7 @@ function main(): void {
 	clickerEl.classList.add("js-enabled")
 
 	const physics = new Physics(
-		collidableElems,
+		collidableElems.map(elem => new HTMLCollider(elem)),
 		() => Vector.copy(mousePos)
 	);
 	const renderer = new Renderer(

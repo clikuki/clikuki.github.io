@@ -49,7 +49,10 @@ export class PhysicsObject {
 	}
 }
 
-interface ColliderInfo {
+export interface Collider {
+	getInfo(): ColliderInfo
+}
+export interface ColliderInfo {
 	x: number;
 	y: number;
 
@@ -61,32 +64,6 @@ interface ColliderInfo {
 	center: Vector;
 };
 
-interface Collider {
-	getInfo(): ColliderInfo
-}
-class HTMLCollider implements Collider {
-	constructor(public element: HTMLElement) {}
-
-	getInfo(): ColliderInfo {
-		const ElemRect = this.element.getBoundingClientRect();
-		return {
-			x: ElemRect.x,
-			y: ElemRect.y,
-
-			w: ElemRect.width,
-			h: ElemRect.height,
-			hw: ElemRect.width / 2,
-			hh: ElemRect.height / 2,
-
-			get center() {
-				return {
-					x: ElemRect.x + ElemRect.width / 2,
-					y: ElemRect.y + ElemRect.height / 2,
-				}
-			},
-		}
-	}
-}
 class RectCollider implements Collider {
 	constructor(
 		private rect: () => {
@@ -133,7 +110,7 @@ const generateID = (() => {
 
 export class Physics {
 	public objects = new Map<string, PhysicsObject>();
-	public colliders: Collider[];
+	// public colliders: Collider[];
 	public t = 0;
 	private dt = 0.01;
 	private dtSqr = this.dt * this.dt;
@@ -153,10 +130,9 @@ export class Physics {
 	private damageFactor = 20;
 
 	constructor(
-		colliderElems: HTMLElement[],
+		public colliders: Collider[],
 		public mouse: () => Vector,
 	){
-		this.colliders = colliderElems.map(elem => new HTMLCollider(elem));
 		this.colliders.push(
 			// The four screen edges
 			new RectCollider(() => ({ x: -20, y: -20, w: innerWidth + 40, h: 20 })),
