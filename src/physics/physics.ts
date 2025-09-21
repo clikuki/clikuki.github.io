@@ -337,14 +337,15 @@ export class Physics {
 
 	private updateHealth(obj: PhysicsObject) {
 		// Kill on low y speed, heal on high speed
-		const speed = obj.velocity.y;
-		if(!obj.isBeingDragged && speed < this.speedThreshold) {
-			const safeSpeed = Math.max(Math.abs(speed), 1);
-			const damage = this.dt * this.damageFactor / safeSpeed;
+		const ySpeed = obj.velocity.y;
+		if(!obj.isBeingDragged && ySpeed < this.speedThreshold) {
+			const safeYSpeed = Math.max(Math.abs(ySpeed), 1);
+			const damage = this.dt * this.damageFactor / safeYSpeed;
 			obj.health = Math.max(0, obj.health - damage);
 			if(obj.health === 0) obj.isDead = true;
 		} else if(obj.health < obj.maxHealth) {
-			obj.health = Math.min(obj.maxHealth, obj.health + this.dt * speed);
+			const speedSqr = Vector.magSqr(obj.velocity)
+			obj.health = Math.min(obj.maxHealth, obj.health + this.dt * speedSqr);
 		}
 	}
 
