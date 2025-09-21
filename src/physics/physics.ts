@@ -339,7 +339,6 @@ export class Physics {
 		// Kill on low y speed, heal on high speed
 		const speed = obj.velocity.y;
 		if(!obj.isBeingDragged && speed < this.speedThreshold) {
-			console.log(speed);
 			const safeSpeed = Math.max(Math.abs(speed), 1);
 			const damage = this.dt * this.damageFactor / safeSpeed;
 			obj.health = Math.max(0, obj.health - damage);
