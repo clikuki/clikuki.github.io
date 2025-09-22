@@ -1,0 +1,260 @@
+---
+import ProjectItem from "./projectItem.astro"
+import { content } from "../content";
+---
+
+<section>
+	<h1>
+		<span class="top">Hi, I'm</span>
+		<span class="middle">Clikuki</span>
+		<span class="bottom">and welcome to my website! </span>
+	</h1>
+	
+	<div class="shortcuts">
+		<a data-collidable="true" href="#projects">My Projects</a><br/>
+		<a data-collidable="true" href={content.socials.github}>My GitHub</a>
+	</div>
+	
+	<img class="cookie" src="pixel_cookie.png" alt="A big cookie?" draggable="false">
+	
+	<ul class="highlights">
+		{content.projects.map(proj => {
+			if(proj.isHighlight) return (<li>
+				<ProjectItem
+					title={proj.title}
+					thumbnailSrc={proj.thumbnailSrc}
+					projectSrc={proj.projectSrc}
+					collidable={true}
+				/>
+			</li>)
+		})}
+	</ul>
+	
+	<div class="cookie-bits"></div>
+</section>
+
+<script src="../physics/core.ts"></script>
+
+<style>
+	section {
+		height: 100vh;
+		padding: 1rem;
+		position: relative;
+		display: grid;
+		grid-template-areas:
+			"header"
+			"shortcuts"
+			"display";
+		grid-template-rows: max-content min-content 2fr;
+		column-gap: 0.5rem;
+
+		background-color: var(--white);
+		background-image: url("/motion.svg");
+		background-repeat: repeat;
+		animation: scrollBG 10s linear infinite;
+		isolation: isolate;
+	}
+	section::before {
+		content: "";
+		position: absolute;
+		inset: 0;
+		background-image:
+			linear-gradient(
+				to bottom,
+				color-mix(in oklab, var(--white) 90%, transparent),
+				transparent,
+				color-mix(in oklab, var(--light) 90%, transparent)
+			);
+		z-index: -1;
+	}
+
+	@keyframes scrollBG {
+		from {
+			background-position: 0 0;
+		}
+		to {
+			background-position: 120.0px -120.0px;
+		}
+	}
+
+	h1 {
+		grid-area: header;
+		justify-self: center;
+		display: flex;
+		width: 90%;
+		flex-direction: column;
+		font-weight: normal;
+		font-size: 1rem;
+		margin: 0;
+	}
+	h1 .middle {
+		font-size: 5em;
+		line-height: 4rem;
+		padding: 0 1rem;
+		text-align: center;
+	}
+	h1 .top,
+	h1 .bottom {
+		text-wrap: nowrap;
+		display: flex;
+		align-items: center;
+		font-size: 1em;
+		gap: 1ch;
+	}
+	h1 .top::after,
+	h1 .bottom::before {
+		content: "";
+		width: 100%;
+		height: 2px;
+		background-color: var(--darker);
+		border-radius: 1rem;
+		flex-grow: 1;
+	}
+
+	.shortcuts {
+		grid-area: shortcuts;
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		margin-top: 1.5rem;
+		gap: 1rem 0;
+		height: min-content;
+	}
+	.shortcuts a {
+		display: inline-block;
+		text-decoration: none;
+		color: inherit;
+		border-radius: .2rem;
+		background-color: var(--light);
+		box-shadow: .3rem .3rem var(--darker);
+		font-size: 1.3rem;
+		margin: 0 .5rem;
+		padding: 1rem 2rem;
+	}
+	
+	.cookie {
+		display: none;
+		grid-area: cookie;
+		align-self: center;
+		justify-self: center;
+		position: relative;
+		width: 100%;
+		max-width: 600px;
+		aspect-ratio: 1;
+		image-rendering: crisp-edges;
+		border-radius: 33%;
+		user-select: none;
+	}
+	.cookie.js-enabled {
+		cursor: pointer;
+		transition: scale 500ms, scale 100ms;
+	}
+	.cookie.js-enabled:hover {
+		scale: 1.03;
+	}
+	.cookie.shake {
+		animation: shake 300ms ease-in-out;
+	}
+	@keyframes shake {
+		from {
+			scale: 1;
+		}
+		50% {
+			scale: 1.04;
+		}
+		to {
+			scale: 1.02;
+		}
+	}
+
+	.cookie-bits {
+		position: absolute;
+		top: 0;
+		left: 0;
+	}
+	.cookie-bits :global(img) {
+		position: absolute;
+		width: 1rem;
+		aspect-ratio: 1;
+		user-select: none;
+		pointer-events: none;
+	}
+	
+	.highlights {
+		--ideal: 100%;
+		position: relative;
+		list-style: none;
+		grid-area: display;
+		display: grid;
+		grid-template-rows: 1fr 1fr;
+		grid-template-columns: 1fr 1fr;
+		gap: 1rem;
+		padding: 0;
+		margin: 0;
+	}
+	.highlights > li {
+		--size: clamp(9.5rem, var(--ideal), 15rem);
+		display: flex;
+		justify-content: center;
+		height: min-content;
+	}
+	.highlights > li:global(:nth-child(1)) {
+		--ideal: 50%;
+		grid-column: 1 / 3;
+		align-self: end;
+		justify-content: center;
+	}
+	.highlights > li:global(:nth-child(2)) {
+		justify-self: end;
+		justify-content: flex-end;
+	}
+	.highlights > li:global(:nth-child(3)) {
+		justify-content: start;
+	}
+
+	@media screen and (min-width: 500px) {
+		h1 {
+			width: max-content;
+		}
+	}
+
+	@media screen and (min-width: 1000px) {
+		section {
+			grid-template-areas:
+				"header cookie display"
+				"shortcuts cookie display";
+			grid-template-rows: max-content 1fr;
+			grid-template-columns: max-content 1fr 1fr;
+		}
+
+		.shortcuts {
+			grid-area: shortcuts;
+			margin-top: 1.5rem;			
+			display: block;
+		}
+		.shortcuts a {
+			margin: 1rem 0 0 2rem;
+			transition: translate 500ms;
+		}
+		.shortcuts a:hover {
+			translate: 1rem 0;
+		}
+		
+		.cookie {
+			display: block;
+		}
+	}
+
+	@media screen and (min-width: 1000px) and (max-width: 1500px) {
+		.highlights {
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+		}
+		.highlights > li:global(:nth-child(1)) {
+			--ideal: 100%;
+			align-self: auto;
+		}
+	}
+</style>

@@ -1,0 +1,17 @@
+{
+  "name": "clikuki-gh-pages",
+  "private": true,
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev --port 5500",
+    "build": "astro build",
+    "preview": "astro preview --port 5500",
+    "astro": "astro",
+		"phys_dev": "tsc --watch -p ./physics_development"
+  },
+  "dependencies": {
+    "astro": "^5.13.0",
+    "typescript": "^5.9.2"
+  }
+}

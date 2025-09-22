@@ -1,0 +1,67 @@
+---
+interface Props {
+	title: string;
+	projectSrc: string;
+	thumbnailSrc: string;
+	collidable: boolean;
+}
+
+const { title, projectSrc, thumbnailSrc, collidable } = Astro.props;
+---
+
+<!-- Seems undefined attributes get stripped, which is desired behavior -->
+<a href={projectSrc} data-collidable={collidable || undefined}>
+	<img src={thumbnailSrc} alt={title}>
+	<span>{title}</span>
+</a>
+
+<style>
+	a {
+		display: grid;
+		grid-template-areas: "sole";
+		align-items: center;
+		justify-items: center;
+		width: var(--size, 10rem);
+		aspect-ratio: 1;
+		overflow: hidden;
+		border-radius: .3rem;
+		color: white;
+		text-decoration: none;
+		user-select: none;
+		box-shadow: .3rem .3rem var(--dark);
+		isolation: isolate;
+		transition: box-shadow 500ms;
+	}
+	img {
+		text-align: center;
+		background: repeating-linear-gradient(
+			135deg,
+			var(--darker) 0px,
+			var(--darker) 1rem,
+			var(--light) 1rem,
+			var(--light) 1.5rem
+		);
+		grid-area: sole;
+		width: 100%;
+		aspect-ratio: 1;
+		z-index: 1;
+		transition: scale 500ms, filter 500ms;
+	}
+	span {
+		grid-area: sole;
+		opacity: 0;
+		text-align: center;
+		z-index: 2;
+		transition: opacity 500ms;
+	}
+	a:hover {
+		box-shadow: .3rem .3rem var(--darker);
+	}
+	a:hover img {
+		scale: 1.2;
+		filter: brightness(.2) blur(2px);
+	}
+	a:hover span {
+		opacity: 1;
+	}
+</style>

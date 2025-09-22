@@ -1,0 +1,52 @@
+---
+import Hero from "../components/hero.astro";
+import ProjectList from "../components/projectList.astro";
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+	<meta name="generator" content={Astro.generator}/>
+	<title>Clikuki's Space</title>
+
+	<!-- TODO: Selfhost fonts -->
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+</head>
+<body>
+	<Hero />
+	<ProjectList />
+</body>
+</html>
+
+<style>
+	:root {
+		--white: #F3E9DC;
+		--darker: #C75D2C;
+		--dark: #D96F32;
+		--light: #F8B259;
+
+		scrollbar-color: var(--darker) var(--light);
+		scrollbar-width: thin;
+  	scroll-behavior: smooth;
+		overflow-x: hidden;
+	}
+
+	body {
+		font-family: "Open Sans", sans-serif;
+		font-optical-sizing: auto;
+		font-weight: normal;
+		font-style: normal;
+		font-variation-settings: "wdth" 100;
+
+		margin: 0;
+		background-color: var(--darker);
+	}
+
+	:global(*, ::before, ::after) {
+		box-sizing: border-box;
+	}
+</style>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Physics Development</title>
+	<script type="module" src="js/core.js"></script>
+	<style>
+		*, ::before, ::after {
+			box-sizing: border-box;
+		}
+
+		body {
+			position: relative;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			height: 100vh;
+			margin: 0;
+			overflow: hidden;
+		}
+
+		.cookie {
+			grid-area: cookie;
+			align-self: center;
+			justify-self: center;
+			position: relative;
+			width: 100%;
+			max-width: 26rem;
+			aspect-ratio: 1;
+			image-rendering: crisp-edges;
+			border-radius: 33%;
+			user-select: none;
+		}
+		.cookie.js-enabled {
+			cursor: pointer;
+			transition: scale 500ms;
+		}
+		.cookie.js-enabled:hover {
+			scale: 1.03;
+		}
+		.cookie.shake {
+			animation: shake 300ms ease-in-out;
+		}
+		@keyframes shake {
+			0% {
+				rotate: 0deg;
+			}
+			20% {
+				rotate: 3deg;
+			}
+			70% {
+				rotate: -3deg;
+			}
+			90% {
+				rotate: 1deg;
+			}
+			100% {
+				rotate: 0deg;
+			}
+		}
+
+		.cookie-bits {
+			position: absolute;
+			top: 0;
+			left: 0;
+		}
+		.cookie-bits img {
+			position: absolute;
+			width: 1rem;
+			aspect-ratio: 1;
+			user-select: none;
+			pointer-events: none;
+		}
+
+		[data-collidable] {
+			position: absolute;
+			background-color: darkgreen;
+			z-index: -1;
+		}
+	</style>
+</head>
+<body>
+	<img class="cookie" src="pixel_cookie.png" alt="A big cookie?" draggable="false">
+	<div class="cookie-bits"></div>
+	<div class="collidables">
+		<div data-collidable style="width: 10rem; height: 15rem; left: 15%; top: 10%;"></div>
+		<div data-collidable style="width: 10rem; height: 15rem; left: 15%; bottom: 10%;"></div>
+		<div data-collidable style="width: 10rem; height: 15rem; right: 15%; top: 10%;"></div>
+		<div data-collidable style="width: 10rem; height: 15rem; right: 15%; bottom: 10%;"></div>
+	</div>
+</body>
+</html>
