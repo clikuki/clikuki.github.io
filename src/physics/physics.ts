@@ -198,7 +198,7 @@ export class Physics {
 			|| obj.position.y < -100
 			|| obj.position.x > innerWidth + 100
 			|| obj.position.y > innerHeight + 100
-			// || this.debug_containsInvalid(obj)
+			|| this.containsInvalid(obj)
 		) {
 			obj.isDead = true;
 			return;
@@ -373,7 +373,16 @@ export class Physics {
 		return alpha;
 	}
 
-	public debug_containsInvalid(obj: PhysicsObject): boolean {
+	// Not ideal solution, ideally prevent invalid states in the first place
+	private containsInvalid(obj: PhysicsObject): boolean {
+		if(Number.isNaN(obj.netForces.x)) return true;
+		if(Number.isNaN(obj.netForces.y)) return true;
+		if(Number.isNaN(obj.netTorque)) return true;
+		if(Number.isNaN(obj.position.x)) return true;
+		if(Number.isNaN(obj.position.y)) return true;
+		if(Number.isNaN(obj.rotation)) return true;
+		return false;
+
 		return /null|undefined/.test(JSON.stringify(obj));
 	}
 
