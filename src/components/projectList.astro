@@ -3,8 +3,8 @@ import ProjectItem from "./projectItem.astro"
 import { content } from "../content";
 ---
 
-<section>
-	<h2 id="projects">My Projects</h2>
+<main aria-labelledby="projects-title">
+	<h2 id="projects-title">My Projects</h2>
 	<ul>
 		{content.projects.map(proj => (
 			<li>
@@ -17,10 +17,10 @@ import { content } from "../content";
 			</li>
 		))}
 	</ul>
-</section>
+</main>
 
 <style>
-	section {
+	main {
 		background-color: var(--white);
 		box-shadow: inset 0 5rem 3rem -5rem var(--darker);
 		padding: 1rem 1rem 2rem 1rem;

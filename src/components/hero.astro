@@ -3,40 +3,45 @@ import ProjectItem from "./projectItem.astro"
 import { content } from "../content";
 ---
 
-<section>
-	<h1>
+<header aria-labelledby="hero-title">
+	<h1 id="hero-title">
 		<span class="top">Hi, I'm</span>
 		<span class="middle">Clikuki</span>
 		<span class="bottom">and welcome to my website! </span>
 	</h1>
 	
-	<div class="shortcuts">
-		<a data-collidable="true" href="#projects">My Projects</a><br/>
-		<a data-collidable="true" href={content.socials.github}>My GitHub</a>
-	</div>
+	<nav>
+		<ul>
+			<li><a data-collidable="true" href="#projects">My Projects</a></li>
+			<li><a data-collidable="true" href={content.socials.github}>My GitHub</a></li>
+		</ul>
+	</nav>
 	
-	<img class="cookie" src="pixel_cookie.png" alt="A big cookie?" draggable="false">
+	<img class="cookie" src="pixel_cookie.png" alt="" draggable="false">
 	
-	<ul class="highlights">
-		{content.projects.map(proj => {
-			if(proj.isHighlight) return (<li>
+	<section aria-labelledby="highlights-title">
+		<h2 id="highlights-title">Highlighted Projects</h2>
+		<ul>
+			{content.projects.map(proj => {
+				if(proj.isHighlight) return (<li>
 				<ProjectItem
 					title={proj.title}
 					thumbnailSrc={proj.thumbnailSrc}
 					projectSrc={proj.projectSrc}
 					collidable={true}
-				/>
+					/>
 			</li>)
 		})}
 	</ul>
-	
-	<div class="cookie-bits"></div>
 </section>
+	
+	<div class="cookie-bits" aria-hidden="true"></div>
+</header>
 
 <script src="../physics/core.ts"></script>
 
 <style>
-	section {
+	header {
 		height: 100vh;
 		padding: 1rem;
 		position: relative;
@@ -54,7 +59,7 @@ import { content } from "../content";
 		animation: scrollBG 10s linear infinite;
 		isolation: isolate;
 	}
-	section::before {
+	header::before {
 		content: "";
 		position: absolute;
 		inset: 0;
@@ -111,16 +116,20 @@ import { content } from "../content";
 		flex-grow: 1;
 	}
 
-	.shortcuts {
+	nav {
 		grid-area: shortcuts;
+	}
+	nav ul {
+		list-style-type: none;
 		display: flex;
 		flex-wrap: wrap;
 		justify-content: center;
-		margin-top: .5rem;
-		gap: .5rem 0;
+		margin: .5rem 0 0 0;
+		padding: 0;
+		gap: .5rem;
 		height: min-content;
 	}
-	.shortcuts a {
+	nav a {
 		display: inline-block;
 		text-decoration: none;
 		color: inherit;
@@ -180,36 +189,49 @@ import { content } from "../content";
 		pointer-events: none;
 	}
 	
-	.highlights {
+	section {
+		grid-area: display;
+	}
+	section h2 {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip-path: rect(0 0 0 0);
+		white-space: nowrap;
+	}
+	section ul {
 		--ideal: 100%;
-		--max: 11rem;
+		--max: 10rem;
 		position: relative;
 		list-style: none;
-		grid-area: display;
 		display: grid;
 		grid-template-rows: 1fr 1fr;
 		grid-template-columns: 1fr 1fr;
 		gap: 1rem;
+		height: 100%;
 		padding: 0;
 		margin: 0;
 	}
-	.highlights > li {
-		--size: clamp(9.5rem, var(--ideal), var(--max));
+	section li {
+		--size: min(var(--ideal), var(--max));
 		display: flex;
 		justify-content: center;
 		height: min-content;
 	}
-	.highlights > li:global(:nth-child(1)) {
+	section li:global(:nth-child(1)) {
 		--ideal: 50%;
 		grid-column: 1 / 3;
 		align-self: end;
 		justify-content: center;
 	}
-	.highlights > li:global(:nth-child(2)) {
+	section li:global(:nth-child(2)) {
 		justify-self: end;
 		justify-content: flex-end;
 	}
-	.highlights > li:global(:nth-child(3)) {
+	section li:global(:nth-child(3)) {
 		justify-content: start;
 	}
 
@@ -220,7 +242,7 @@ import { content } from "../content";
 	}
 
 	@media screen and (min-width: 1000px) {
-		section {
+		header {
 			grid-template-areas:
 				"header cookie display"
 				"shortcuts cookie display";
@@ -228,16 +250,16 @@ import { content } from "../content";
 			grid-template-columns: max-content 1fr 1fr;
 		}
 
-		.shortcuts {
-			grid-area: shortcuts;
+		nav ul {
+			flex-direction: column;
 			margin-top: 1.5rem;			
 			display: block;
 		}
-		.shortcuts a {
+		nav a {
 			margin: 1rem 0 0 2rem;
 			transition: translate 500ms;
 		}
-		.shortcuts a:hover {
+		nav a:hover {
 			translate: 1rem 0;
 		}
 		
@@ -247,21 +269,21 @@ import { content } from "../content";
 	}
 
 	@media screen and (min-width: 1000px) and ((max-width: 1100px) or ((max-width: 1500px) and (min-height: 700px))) {
-		.highlights {
+		section ul {
 			display: flex;
 			flex-direction: column;
 			flex-wrap: wrap;
 			justify-content: center;
 			align-items: center;
 		}
-		.highlights > li:global(:nth-child(1)) {
+		section li:global(:nth-child(1)) {
 			--ideal: 100%;
 			align-self: auto;
 		}
 	}
 
 	@media screen and (min-height: 700px) {
-		.highlights {
+		section ul {
 			--max: 15rem;
 		}
 	}
