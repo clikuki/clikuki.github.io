@@ -72,7 +72,10 @@ function main(): void {
 		mousePos.y = ev.y + document.documentElement.scrollTop;
 	})
 	window.addEventListener("mousedown", (ev) => {
-		if(ev.target instanceof HTMLElement) {
+		if(ev.target === clickerEl) {
+			clickerEl.setAttribute("data-mousedown", "");
+		}
+		else {
 			draggedObject = getObjectAtPosition(mousePos, physics);
 			if(draggedObject) {
 				draggedObject.isBeingDragged = true;
@@ -86,7 +89,7 @@ function main(): void {
 			draggedObject.isBeingDragged = false;
 			draggedObject = null;
 		}
-		else if(ev.target === clickerEl) {
+		else if(ev.target === clickerEl && clickerEl.hasAttribute("data-mousedown")) {
 			renderer.add(physics.spawn(
 				ev.x,
 				ev.y + document.documentElement.scrollTop,
@@ -99,6 +102,8 @@ function main(): void {
 				clickerEl.classList.add("shake");
 			})
 		}
+		
+		clickerEl.removeAttribute("data-mousedown");
 	})
 
 	try {
