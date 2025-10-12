@@ -57,11 +57,12 @@ function main(): void {
 	const canvasEl = document.querySelector("canvas") as HTMLCanvasElement || undefined;
 	
 	let draggedObject: PhysicsObject | null = null;
+	const scrollBy = new Vector(0,0);
 	const mousePos = new Vector(0,0);
 
 	const physics = new Physics(
 		collidableElems.map(elem => new HTMLCollider(elem)),
-		() => Vector.copy(mousePos)
+		() => Vector.add(mousePos, scrollBy)
 	);
 	physics.doHealthUpdates = false;
 
@@ -71,16 +72,21 @@ function main(): void {
 		canvasEl,
 	);
 
+	document.addEventListener("scroll", () => {
+		scrollBy.x = document.documentElement.scrollLeft;
+		scrollBy.y = document.documentElement.scrollTop;
+	})
 	window.addEventListener("mousemove", (ev) => {
 		mousePos.x = ev.x;
-		mousePos.y = ev.y + document.documentElement.scrollTop;
+		mousePos.y = ev.y;
 	})
 	window.addEventListener("mousedown", (ev) => {
 		if(ev.target === clickerEl) {
 			clickerEl.setAttribute("data-mousedown", "");
 		}
 		else {
-			draggedObject = getObjectAtPosition(mousePos, physics);
+			const position = Vector.add(mousePos, scrollBy);
+			draggedObject = getObjectAtPosition(position, physics);
 			if(draggedObject) {
 				draggedObject.isBeingDragged = true;
 				document.body.style.userSelect = "none";
@@ -94,10 +100,8 @@ function main(): void {
 			draggedObject = null;
 		}
 		else if(ev.target === clickerEl && clickerEl.hasAttribute("data-mousedown")) {
-			renderer.add(physics.spawn(
-				ev.x,
-				ev.y + document.documentElement.scrollTop,
-			))
+			const position = Vector.add(mousePos, scrollBy);
+			renderer.add(physics.spawn(position.x, position.y));
 
 			// Apply shake animation
 			clickerEl.classList.toggle("shake");
