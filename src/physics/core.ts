@@ -50,21 +50,25 @@ function getObjectAtPosition(point: Vector, physics: Physics): PhysicsObject | n
 
 function main(): void {
 	const clickerEl = document.querySelector("img.cookie") as HTMLImageElement;
+	clickerEl.classList.add("js-enabled")
+
 	const bitContainerEl = document.querySelector(".cookie-bits") as HTMLElement;
 	const collidableElems = Array.from(document.querySelectorAll("[data-collidable]")) as HTMLElement[];
+	const canvasEl = document.querySelector("canvas") as HTMLCanvasElement || undefined;
 	
 	let draggedObject: PhysicsObject | null = null;
 	const mousePos = new Vector(0,0);
-
-	clickerEl.classList.add("js-enabled")
 
 	const physics = new Physics(
 		collidableElems.map(elem => new HTMLCollider(elem)),
 		() => Vector.copy(mousePos)
 	);
+	physics.doHealthUpdates = false;
+
 	const renderer = new Renderer(
 		physics.objects,
 		bitContainerEl,
+		canvasEl,
 	);
 
 	window.addEventListener("mousemove", (ev) => {
@@ -107,25 +111,7 @@ function main(): void {
 	})
 
 	try {
-		// let last = performance.now();
-		// const birth = new Map<typeof physics.objects[0], number>();
 		requestAnimationFrame(function updateLoop(t) {
-			// if(t - last < (1000 / 60)) {
-			// 	requestAnimationFrame(updateLoop);
-			// 	return;
-			// }
-			// last = t;
-
-			// for(const obj of physics.objects) {
-			// 	if(obj.isDead) {
-			// 		console.log(t - birth.get(obj)!);
-			// 		birth.delete(obj);
-			// 	}
-			// 	else if(!birth.has(obj)) {
-			// 		birth.set(obj, t);
-			// 	}
-			// }
-
 			const alpha = physics.update(t);
 			renderer.update(alpha);
 			requestAnimationFrame(updateLoop);

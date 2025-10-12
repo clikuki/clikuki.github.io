@@ -131,6 +131,11 @@ export class Physics {
 	private speedThreshold = 1;
 	private damageFactor = 20;
 
+	public enableDrag = true;
+	public enableMouseAttractor = true;
+	public enableGravity = true;
+	public doHealthUpdates = true;
+
 	constructor(
 		public colliders: Collider[],
 		public mouse: () => Vector,
@@ -168,7 +173,7 @@ export class Physics {
 		);
 
 		// DEBUG EDITS
-		// obj.radius = 30;
+		obj.radius = 40;
 		// obj.angularVelocity = 0;
 		
 		// const center = new Vector(innerWidth / 2, innerHeight / 2)
@@ -209,7 +214,6 @@ export class Physics {
 		}
 		
 		obj.prevPosition = prevPos;
-		obj.netForces = { x: 0, y: 0 };
 	}
 	private solveRotation(obj: PhysicsObject) {
 		const prevRot = obj.rotation;
@@ -222,7 +226,6 @@ export class Physics {
 		}
 	
 		obj.prevRotation = prevRot;
-		obj.netTorque = 0;
 	}
 	private updateVelocities(obj: PhysicsObject) {
 		obj.velocity = Vector.div(Vector.sub(obj.position, obj.prevPosition), this.dt);
@@ -288,16 +291,16 @@ export class Physics {
 	}
 	private solveCollision(collisionData: CollisionData): void {
 		const { object, distVec, distMag } = collisionData;
-
+		
 		// Push out of collider
 		const penetrationDepth = object.radius - distMag;
 		const penetrationVector = Vector.mult(distVec, penetrationDepth / distMag);
 		object.position = Vector.add(object.position, penetrationVector);
-
+		
 		// Update velocities
 		const normalVec = Vector.from(Math.atan2(distVec.y, distVec.x));
 		const tangentVec = { x: -normalVec.y, y: normalVec.x };
-
+		
 		const startVel = object.velocity;
 		const normalVel = Vector.mult(
 			Vector.project(startVel, normalVec), -this.restitutionCoefficient
@@ -306,7 +309,7 @@ export class Physics {
 		const signedTangentSpeed = Vector.dot(startVel, tangentVec)
 		const collisionVelocity = this.computeCollisionVelocity(signedTangentSpeed, object);
 		const tangentVel = Vector.mult(tangentVec, collisionVelocity.linear);
-
+		
 		const finalLinearVel = Vector.mult(Vector.add(normalVel,tangentVel), this.dt);
 		const finalAngularVel = collisionVelocity.angular * this.dt;
 		object.prevPosition = Vector.sub(object.position, finalLinearVel);
@@ -317,9 +320,12 @@ export class Physics {
 		for(const [, obj] of this.objects) {
 			if(obj.isDead) continue;
 			
-			this.applyDrag(obj);
-			if(obj.isBeingDragged) this.applyMouseAttractor(obj);
-			else this.applyGravity(obj);
+			obj.netForces = { x: 0, y: 0 };
+			obj.netTorque = 0;			
+
+			if(this.enableDrag) this.applyDrag(obj);
+			if(obj.isBeingDragged && this.enableMouseAttractor) this.applyMouseAttractor(obj);
+			else if(this.enableGravity) this.applyGravity(obj);
 
 			this.solvePosition(obj);
 			this.solveRotation(obj);
@@ -330,7 +336,7 @@ export class Physics {
 			}
 
 			this.updateVelocities(obj);
-			this.updateHealth(obj);
+			if(this.doHealthUpdates) this.updateHealth(obj);
 			obj.age += this.dt;
 		}
 	}
@@ -382,8 +388,6 @@ export class Physics {
 		if(Number.isNaN(obj.position.y)) return true;
 		if(Number.isNaN(obj.rotation)) return true;
 		return false;
-
-		return /null|undefined/.test(JSON.stringify(obj));
 	}
 
 	/** FOR DEBUG ONLY; FOR STEPPING THRU PHYSICS ONE BY ONE */
