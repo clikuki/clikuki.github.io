@@ -26,7 +26,7 @@
 			justify-self: center;
 			position: relative;
 			width: 100%;
-			max-width: 26rem;
+			max-width: 20rem;
 			aspect-ratio: 1;
 			image-rendering: crisp-edges;
 			border-radius: 33%;
@@ -78,16 +78,25 @@
 			background-color: darkgreen;
 			z-index: -1;
 		}
+
+		canvas {
+			position: absolute;
+			left: 0;
+			top: 0;
+			pointer-events: none;
+		}
 	</style>
 </head>
 <body>
 	<img class="cookie" src="pixel_cookie.png" alt="A big cookie?" draggable="false">
 	<div class="cookie-bits"></div>
 	<div class="collidables">
-		<div data-collidable style="width: 10rem; height: 15rem; left: 15%; top: 10%;"></div>
+		<div data-collidable style="width: 50rem; height: 3rem; left: 15%; bottom: 10%;"></div>
+		<!-- <div data-collidable style="width: 10rem; height: 15rem; left: 15%; top: 10%;"></div>
 		<div data-collidable style="width: 10rem; height: 15rem; left: 15%; bottom: 10%;"></div>
 		<div data-collidable style="width: 10rem; height: 15rem; right: 15%; top: 10%;"></div>
-		<div data-collidable style="width: 10rem; height: 15rem; right: 15%; bottom: 10%;"></div>
+		<div data-collidable style="width: 10rem; height: 15rem; right: 15%; bottom: 10%;"></div> -->
 	</div>
+	<canvas></canvas>
 </body>
 </html>

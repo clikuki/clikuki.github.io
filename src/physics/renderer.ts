@@ -4,10 +4,17 @@ export class Renderer {
 	public elementClass = "cookiebit";
 	private imgSrc = "pixel_cookie.png";
 	private elements = new Map<string, HTMLImageElement>()
+	private ctx: CanvasRenderingContext2D;
+	private vecMult = 2;
 	constructor(
 		private physObjects: Map<string, PhysicsObject>,
 		private containerEl: HTMLElement,
-	) {}
+		private debugCanvas?: HTMLCanvasElement,
+	) {
+		if(debugCanvas) {
+			this.ctx = debugCanvas.getContext("2d")!;
+		}
+	}
 
 	public add(obj: PhysicsObject): HTMLImageElement {
 		const elem = document.createElement("img");
@@ -23,6 +30,15 @@ export class Renderer {
 		return elem;
 	}
 	public update(a = 1) {
+		if(this.debugCanvas) {
+			this.debugCanvas.width = innerWidth;
+			this.debugCanvas.height = innerHeight;
+		}
+
+		if(this.debugCanvas) {
+			this.ctx.beginPath();
+		}
+
 		for(const [id, obj] of this.physObjects) {
 			let elem = this.elements.get(id);
 			if(obj.isDead) {
@@ -43,7 +59,26 @@ export class Renderer {
 				elem.style.top = `${y - obj.radius}px`;
 				elem.style.rotate = `${Math.PI / 2 - rot}rad`;
 				elem.style.opacity = String(opacity);
+
+				if(this.debugCanvas) {
+					this.ctx.moveTo(obj.position.x, obj.position.y);
+					this.ctx.lineTo(
+						obj.position.x + obj.netForces.x * this.vecMult,
+						obj.position.y + obj.netForces.y * this.vecMult
+					);
+					this.ctx.moveTo(obj.position.x, obj.position.y);
+					this.ctx.lineTo(
+						obj.position.x + obj.velocity.x * this.vecMult,
+						obj.position.y + obj.velocity.y * this.vecMult
+					);
+				}
 			}
+		}
+
+		if(this.debugCanvas) {
+			this.ctx.lineWidth = 2;
+			this.ctx.strokeStyle = "black";
+			this.ctx.stroke();
 		}
 	}
 }

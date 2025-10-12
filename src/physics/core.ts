@@ -50,30 +50,42 @@ function getObjectAtPosition(point: Vector, physics: Physics): PhysicsObject | n
 
 function main(): void {
 	const clickerEl = document.querySelector("img.cookie") as HTMLImageElement;
+	clickerEl.classList.add("js-enabled")
+
 	const bitContainerEl = document.querySelector(".cookie-bits") as HTMLElement;
 	const collidableElems = Array.from(document.querySelectorAll("[data-collidable]")) as HTMLElement[];
+	const canvasEl = document.querySelector("canvas") as HTMLCanvasElement || undefined;
 	
 	let draggedObject: PhysicsObject | null = null;
+	const scrollBy = new Vector(0,0);
 	const mousePos = new Vector(0,0);
-
-	clickerEl.classList.add("js-enabled")
 
 	const physics = new Physics(
 		collidableElems.map(elem => new HTMLCollider(elem)),
-		() => Vector.copy(mousePos)
+		() => Vector.add(mousePos, scrollBy)
 	);
+
 	const renderer = new Renderer(
 		physics.objects,
 		bitContainerEl,
+		canvasEl,
 	);
 
+	document.addEventListener("scroll", () => {
+		scrollBy.x = document.documentElement.scrollLeft;
+		scrollBy.y = document.documentElement.scrollTop;
+	})
 	window.addEventListener("mousemove", (ev) => {
 		mousePos.x = ev.x;
-		mousePos.y = ev.y + document.documentElement.scrollTop;
+		mousePos.y = ev.y;
 	})
 	window.addEventListener("mousedown", (ev) => {
-		if(ev.target instanceof HTMLElement) {
-			draggedObject = getObjectAtPosition(mousePos, physics);
+		if(ev.target === clickerEl) {
+			clickerEl.setAttribute("data-mousedown", "");
+		}
+		else {
+			const position = Vector.add(mousePos, scrollBy);
+			draggedObject = getObjectAtPosition(position, physics);
 			if(draggedObject) {
 				draggedObject.isBeingDragged = true;
 				document.body.style.userSelect = "none";
@@ -86,11 +98,9 @@ function main(): void {
 			draggedObject.isBeingDragged = false;
 			draggedObject = null;
 		}
-		else if(ev.target === clickerEl) {
-			renderer.add(physics.spawn(
-				ev.x,
-				ev.y + document.documentElement.scrollTop,
-			))
+		else if(ev.target === clickerEl && clickerEl.hasAttribute("data-mousedown")) {
+			const position = Vector.add(mousePos, scrollBy);
+			renderer.add(physics.spawn(position.x, position.y));
 
 			// Apply shake animation
 			clickerEl.classList.toggle("shake");
@@ -99,28 +109,12 @@ function main(): void {
 				clickerEl.classList.add("shake");
 			})
 		}
+		
+		clickerEl.removeAttribute("data-mousedown");
 	})
 
 	try {
-		// let last = performance.now();
-		// const birth = new Map<typeof physics.objects[0], number>();
 		requestAnimationFrame(function updateLoop(t) {
-			// if(t - last < (1000 / 60)) {
-			// 	requestAnimationFrame(updateLoop);
-			// 	return;
-			// }
-			// last = t;
-
-			// for(const obj of physics.objects) {
-			// 	if(obj.isDead) {
-			// 		console.log(t - birth.get(obj)!);
-			// 		birth.delete(obj);
-			// 	}
-			// 	else if(!birth.has(obj)) {
-			// 		birth.set(obj, t);
-			// 	}
-			// }
-
 			const alpha = physics.update(t);
 			renderer.update(alpha);
 			requestAnimationFrame(updateLoop);
