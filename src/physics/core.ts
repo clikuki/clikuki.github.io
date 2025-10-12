@@ -64,7 +64,6 @@ function main(): void {
 		collidableElems.map(elem => new HTMLCollider(elem)),
 		() => Vector.add(mousePos, scrollBy)
 	);
-	physics.doHealthUpdates = false;
 
 	const renderer = new Renderer(
 		physics.objects,
