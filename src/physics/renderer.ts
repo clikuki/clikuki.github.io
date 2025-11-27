@@ -2,7 +2,7 @@ import { PhysicsObject } from "./physics.js";
 
 export class Renderer {
 	public elementClass = "cookiebit";
-	private imgSrc = "pixel_cookie.png";
+	private imgSrc = "pixel_cookie.webp";
 	private elements = new Map<string, HTMLImageElement>()
 	private ctx: CanvasRenderingContext2D;
 	private vecMult = 2;
