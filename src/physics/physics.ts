@@ -51,7 +51,7 @@ export class PhysicsObject {
 }
 
 export interface Collider {
-	getInfo(): ColliderInfo
+	getInfo(t: number): ColliderInfo
 }
 export interface ColliderInfo {
 	x: number;
@@ -62,7 +62,8 @@ export interface ColliderInfo {
 	hw: number;
 	hh: number;
 	
-	center: Vector;
+	cx: number;
+	cy: number,
 };
 
 class RectCollider implements Collider {
@@ -87,10 +88,8 @@ class RectCollider implements Collider {
 			hw: w / 2,
 			hh: h / 2,
 
-			center: {
-				x: x + w / 2,
-				y: y + h / 2,
-			},
+			cx: x + w / 2,
+			cy: y + h / 2,
 		}
 	}
 }
@@ -111,15 +110,14 @@ const generateID = (() => {
 
 export class Physics {
 	public objects = new Map<string, PhysicsObject>();
-	// public colliders: Collider[];
 	public t = 0;
-	private dt = 0.05;
+	private dt = 0.02;
 	private dtSqr = this.dt * this.dt;
 	private currentTime = performance.now();
 	private accumulator = 0;
 	private halfPI = Math.PI / 2;
 	
-	private gravity = { x: 0, y: 10 };
+	private gravity = { x: 0, y: 14 };
 	private dragCoefficient = .01;
 	private restitutionCoefficient = .7;
 	private rollingCoefficient = .02;
@@ -135,6 +133,10 @@ export class Physics {
 	public enableMouseAttractor = true;
 	public enableGravity = true;
 	public doHealthUpdates = true;
+
+	// Set on start of every update
+	private screenWidth: number;
+	private screenHeight: number;
 
 	constructor(
 		public colliders: Collider[],
@@ -201,8 +203,8 @@ export class Physics {
 		if(
 			obj.position.x < -100
 			|| obj.position.y < -100
-			|| obj.position.x > innerWidth + 100
-			|| obj.position.y > innerHeight + 100
+			|| obj.position.x > this.screenWidth + 100
+			|| obj.position.y > this.screenHeight + 100
 			|| this.containsInvalid(obj)
 		) {
 			obj.isDead = true;
@@ -269,8 +271,8 @@ export class Physics {
 	private findCollisions(obj: PhysicsObject): CollisionData[] {
 		const hits: CollisionData[] = [];
 		for(const collider of this.colliders) {
-			const info =  collider.getInfo();
-			const diff = Vector.sub(obj.position, info.center);
+			const info =  collider.getInfo(this.t);
+			const diff = Vector.sub(obj.position, { x: info.cx, y: info.cy });
 			const closest = {
 				x: Math.max(Math.min(diff.x, info.hw), -info.hw),
 				y: Math.max(Math.min(diff.y, info.hh), -info.hh),
@@ -317,6 +319,9 @@ export class Physics {
 	}
 
 	private updateObjects() {
+		this.screenWidth = innerWidth;
+		this.screenHeight = innerHeight;
+
 		for(const [, obj] of this.objects) {
 			if(obj.isDead) continue;
 			

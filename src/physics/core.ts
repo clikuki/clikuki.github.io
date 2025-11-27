@@ -2,27 +2,45 @@ import { Renderer } from "./renderer.js";
 import { Physics, PhysicsObject, Vector } from "./physics.js";
 import type { Collider, ColliderInfo } from "./physics.js";
 
+interface Rect {
+	x: number;
+	y: number;
+	w: number;
+	h: number;
+}
 class HTMLCollider implements Collider {
 	constructor(public element: HTMLElement) {}
 
-	getInfo(): ColliderInfo {
-		const ElemRect = this.element.getBoundingClientRect();
-		ElemRect.y += document.documentElement.scrollTop;
+	private debounceDurationMS = 500;
+	private timeUntilRefresh = -1000;
+	private rect: Rect;
+	private scrollTop: number;
+	getInfo(t: number): ColliderInfo {
+		if(t >= this.timeUntilRefresh) {
+			this.timeUntilRefresh = t + this.debounceDurationMS;
+			this.scrollTop = document.documentElement.scrollTop;
+
+			const domRect = this.element.getBoundingClientRect();
+			this.rect = {
+				x: domRect.x,
+				y: domRect.y,
+				w: domRect.width,
+				h: domRect.height,
+			};
+		}
+
+		const rect = this.rect, scrollTop = this.scrollTop;
 		return {
-			x: ElemRect.x,
-			y: ElemRect.y,
+			x: rect.x,
+			y: rect.y + this.scrollTop,
 
-			w: ElemRect.width,
-			h: ElemRect.height,
-			hw: ElemRect.width / 2,
-			hh: ElemRect.height / 2,
+			w: rect.w,
+			h: rect.h,
+			hw: rect.w / 2,
+			hh: rect.h / 2,
 
-			get center() {
-				return {
-					x: ElemRect.x + ElemRect.width / 2,
-					y: ElemRect.y + ElemRect.height / 2,
-				}
-			},
+			cx: rect.x + rect.w / 2,
+			cy: rect.y + rect.h / 2 + scrollTop,
 		}
 	}
 }

@@ -33,45 +33,45 @@ export const content: ContentStructure = {
 		{
 			title: "Periodic Table Quiz",
 			projectSrc: "https://clikuki.github.io/periodic_table_quiz/",
-			thumbnailSrc: "thumbnails/periodicTable.png",
+			thumbnailSrc: "thumbnails/periodicTable.webp",
 			isHighlight: true,
 		},
 		{
 			title: "Maze Generator",
 			projectSrc: "https://clikuki.github.io/mazeGenerator/",
-			thumbnailSrc: "thumbnails/mazeGenerator.png",
+			thumbnailSrc: "thumbnails/mazeGenerator.webp",
 			isHighlight: true,
 		},
 		{
 			title: "Conway's Game Of Life",
 			projectSrc: "https://clikuki.github.io/gameOfLife/",
-			thumbnailSrc: "thumbnails/gameOfLife.png",
+			thumbnailSrc: "thumbnails/gameOfLife.webp",
 		},
 		{
 			title: "Lambda Calculus Visualizer",
 			projectSrc: "https://clikuki.github.io/lambda/",
-			thumbnailSrc: "thumbnails/lambda.png",
+			thumbnailSrc: "thumbnails/lambda.webp",
 			isHighlight: true,
 		},
 		{
 			title: "Concentration",
 			projectSrc: "https://clikuki.github.io/memoryCards/",
-			thumbnailSrc: "thumbnails/concentration.png",
+			thumbnailSrc: "thumbnails/concentration.webp",
 		},
 		{
 			title: "Minesweeper",
 			projectSrc: "https://clikuki.github.io/minesweeper/",
-			thumbnailSrc: "thumbnails/minesweeper.png",
+			thumbnailSrc: "thumbnails/minesweeper.webp",
 		},
 		{
 			title: "Crossword Generator",
 			projectSrc: "https://clikuki.github.io/crossword/",
-			thumbnailSrc: "thumbnails/crossword.png",
+			thumbnailSrc: "thumbnails/crossword.webp",
 		},
 		{
 			title: "Airplane Boarding Simulation",
 			projectSrc: "https://clikuki.github.io/planeBoardingSimulation/",
-			thumbnailSrc: "thumbnails/planeBoarding.png",
+			thumbnailSrc: "thumbnails/planeBoarding.webp",
 		},
 	]
 }
