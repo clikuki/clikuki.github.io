@@ -11,7 +11,12 @@ const { title, projectSrc, thumbnailSrc, collidable } = Astro.props;
 
 <!-- Seems undefined attributes get stripped, which is desired behavior -->
 <a href={projectSrc} data-collidable={collidable || undefined}>
-	<img src={thumbnailSrc} alt="">
+	<img
+		src={thumbnailSrc}
+		decoding="async"
+		loading="lazy"
+		alt=""
+	>
 	<span>{title}</span>
 </a>
 
