@@ -10,11 +10,8 @@ import ProjectList from "../components/projectList.astro";
 	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 	<meta name="generator" content={Astro.generator}/>
 	<title>Clikuki's Space</title>
-
-	<!-- TODO: Selfhost fonts -->
-	<link rel="preconnect" href="https://fonts.googleapis.com">
-	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+	<link rel="preload" href="/fonts/open-sans-v44-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+	<link rel="preload" href="/fonts/open-sans-v44-latin-700.woff2" as="font" type="font/woff2" crossorigin>
 </head>
 <body>
 	<Hero />
@@ -23,6 +20,24 @@ import ProjectList from "../components/projectList.astro";
 </html>
 
 <style>
+	/* open-sans-regular - latin */
+	@font-face {
+		font-display: swap;
+		font-family: 'Open Sans';
+		font-style: normal;
+		font-weight: 400;
+		src: url('../fonts/open-sans-v44-latin-regular.woff2') format('woff2');
+	}
+
+	/* open-sans-700 - latin */
+	@font-face {
+		font-display: swap;
+		font-family: 'Open Sans';
+		font-style: normal;
+		font-weight: 700;
+		src: url('../fonts/open-sans-v44-latin-700.woff2') format('woff2');
+	}
+
 	:root {
 		--white: #F3E9DC;
 		--darker: #C75D2C;
@@ -36,7 +51,7 @@ import ProjectList from "../components/projectList.astro";
 	}
 
 	body {
-		font-family: "Open Sans", sans-serif;
+		font-family: "Open Sans", Arial, sans-serif;
 		font-optical-sizing: auto;
 		font-weight: normal;
 		font-style: normal;
