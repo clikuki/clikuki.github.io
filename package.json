@@ -8,10 +8,10 @@
     "build": "astro build",
     "preview": "astro preview --port 5500",
     "astro": "astro",
-		"phys_dev": "tsc --watch -p ./physics_development"
+    "phys_dev": "tsc --watch -p ./physics_development"
   },
   "dependencies": {
-    "astro": "^5.13.0",
+    "astro": "^5.16.1",
     "typescript": "^5.9.2"
   }
 }
