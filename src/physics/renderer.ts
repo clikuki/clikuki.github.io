@@ -21,9 +21,13 @@ export class Renderer {
 		elem.src = this.imgSrc;
 		elem.draggable = false;
 		elem.id = obj.id;
-		elem.style.left = `${obj.position.x - obj.radius}px`;
-		elem.style.top = `${obj.position.y - obj.radius}px`;
-		elem.style.width = `${obj.radius + obj.radius}px`;
+		elem.style.cssText = `
+			width: ${obj.radius + obj.radius}px;
+			left: ${obj.position.x - obj.radius}px;
+			top: ${obj.position.y - obj.radius}px;
+			rotate: ${Math.PI / 2 - obj.rotation}rad;
+			opacity: 1;
+		`;
 
 		this.containerEl.appendChild(elem);
 		this.elements.set(obj.id, elem);
@@ -50,14 +54,14 @@ export class Renderer {
 			else {
 				elem ??= this.add(obj);
 				
-				const x = obj.position.x * a + obj.prevPosition.x * (1-a);
-				const y = obj.position.y * a + obj.prevPosition.y * (1-a);
-				const rot = obj.rotation * a + obj.prevRotation * (1-a);
+				const x = (obj.prevPosition.x - obj.position.x) * a + obj.position.x;
+				const y = (obj.prevPosition.y - obj.position.y) * a + obj.position.y;
+				const rot = (obj.prevRotation - obj.rotation) * a + obj.rotation;
 				const opacity = obj.health / obj.maxHealth;
 
 				elem.style.left = `${x - obj.radius}px`;
 				elem.style.top = `${y - obj.radius}px`;
-				elem.style.rotate = `${Math.PI / 2 - rot}rad`;
+				elem.style.rotate = `${Math.PI / 2 - rot}rad`; // Adapt to dom rotation model
 				elem.style.opacity = String(opacity);
 
 				if(this.debugCanvas) {
