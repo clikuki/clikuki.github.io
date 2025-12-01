@@ -1,16 +1,12 @@
 interface ContentStructure {
 	projects: ProjectDefinition[];
-	socials: Socials;
+	socials: Record<string, string >;
 }
 interface ProjectDefinition {
 	title: string;
 	thumbnailSrc: string;
 	projectSrc: string;
 	isHighlight?: boolean;
-}
-interface Socials {
-	github: string;
-	reddit: string;
 }
 
 /**
@@ -26,8 +22,7 @@ interface Socials {
 
 export const content: ContentStructure = {
 	socials: {
-		github: "https://github.com/clikuki/",
-		reddit: "https://www.reddit.com/user/Clikuki/",
+		blog: "https://clikuki.github.io/blog/"
 	},
 	projects: [
 		{

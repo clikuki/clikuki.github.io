@@ -11,13 +11,13 @@ interface Rect {
 class HTMLCollider implements Collider {
 	constructor(public element: HTMLElement) {}
 
-	private debounceDurationMS = 500;
+	private debounceDuration = 10;
 	private timeUntilRefresh = -1000;
 	private rect: Rect;
 	private scrollTop: number;
 	getInfo(t: number): ColliderInfo {
 		if(t >= this.timeUntilRefresh) {
-			this.timeUntilRefresh = t + this.debounceDurationMS;
+			this.timeUntilRefresh = t + this.debounceDuration;
 			this.scrollTop = document.documentElement.scrollTop;
 
 			const domRect = this.element.getBoundingClientRect();

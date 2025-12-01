@@ -175,7 +175,7 @@ export class Physics {
 		);
 
 		// DEBUG EDITS
-		obj.radius = 40;
+		// obj.radius = 40;
 		// obj.angularVelocity = 0;
 		
 		// const center = new Vector(innerWidth / 2, innerHeight / 2)
