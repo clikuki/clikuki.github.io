@@ -1,8 +1,10 @@
-interface ContentStructure {
+interface ContentStructure
+{
 	projects: ProjectDefinition[];
-	socials: Record<string, string >;
+	socials: Record<string, string>;
 }
-interface ProjectDefinition {
+interface ProjectDefinition
+{
 	title: string;
 	thumbnailSrc: string;
 	projectSrc: string;
@@ -21,9 +23,7 @@ interface ProjectDefinition {
  */
 
 export const content: ContentStructure = {
-	socials: {
-		blog: "https://clikuki.github.io/blog/"
-	},
+	socials: {},
 	projects: [
 		{
 			title: "Periodic Table Quiz",
